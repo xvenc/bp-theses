@@ -18,8 +18,13 @@ class Downloader:
                     wf.write(data)
         return True
 
-    def download(self, csv, task_id, outpud_dir):
+    def download_from_csv(self, csv, task_id, outpud_dir):
         for row in csv:
             res = self._download_pcap(row['Sample_id'], task_id, outpud_dir, row['Filename'])
             if res:
                 print("Pcap for {0} downloaded.".format(row['Filename']))
+
+    def download_sample(self, sample_id, task_id, outpud_dir, filename):
+        res  = self._download_pcap(sample_id, task_id, outpud_dir, filename)
+        if res:
+            print("Pcap for {0} downloaded.".format(filename))

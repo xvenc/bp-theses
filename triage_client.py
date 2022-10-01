@@ -5,10 +5,12 @@ import getopt
 from hashlib import md5
 from pcap_downloader import Downloader
 import csv
+import time
+
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
-
+log_dir = "logs/"
 
 def help():
     print("Usage: python3 triage_client [COMMAND] [OPTION]\n")
@@ -55,10 +57,29 @@ def arg_parse():
 def get_hash(sample_id: str) -> str:
     return client.overview_report(sample_id)['sample']['md5']
 
+def create_file_name(directory):
+    log_f = directory.replace('/','_')
+    if log_f.endswith('_'):
+        log_f = log_f[:-1] + ".csv"
+    else:
+        log_f = log_f + ".csv"
+    return log_f
+
+
+def write_header(file):
+    header = ['Filename', 'Sample_id', 'mb5_hash']
+    with open(log_dir+file, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
 
 # log sample id and from witch directory its from
-def log(sample_id : str, directory : str):
-    pass
+def log(sample_id : str, filename : str, log_f : str):
+    data = [filename, sample_id, get_hash(sample_id)]
+    with open(log_dir+log_f, 'a') as f:
+        # create the csv writer
+        writer = csv.writer(f)
+        # write a row to the csv file
+        writer.writerow(data)
 
 def check_submited(filepath : str) -> bool:
     for record in client.owned_samples():
@@ -70,28 +91,41 @@ def check_submited(filepath : str) -> bool:
 # function to submit simple file using triage API
 def submit_file(filepath : str):
     filename = path.basename(filepath)
-    if check_submited(filepath):
-        response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, None)
-        return response
-    return "already submited"
+   # if check_submited(filepath):
+   #     response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, None)
+   #     return response
+
+    response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
+    return response
 
 # function to submit all files from a directory
-def submit_directory(directory, client : triage.Client):
-    for filename in listdir(directory):
-        f = path.join(directory, filename)
+def submit_directory(directory, client : triage.Client, d, output_dir):
+    log_f= create_file_name(directory)
+    write_header(log_f)
+    for file in listdir(directory):
+        f = path.join(directory, file)
         # checking if it is a file
         if path.isfile(f):
             res = submit_file(f)
+            # TODO wait til sample is submited
+            print("Submitted malware {0}".format(res['filename']))
+            time.sleep(230)
+            if client.sample_by_id(res['id'])['status'] == 'reported':
+                log(res['id'], res['filename'], log_f)
+                d.download_sample(res['id'], 'behavioral1', output_dir, res['filename'])
+
+
 
 # MAIN
 
 client = triage.Client(auth_api_key, public_api)
 command,option = arg_parse()
+d = Downloader(public_api+"v0/samples", auth_api_key)
+
 
 if command['--submit']:
-    print("submit")
     if option['-d'][0] and path.isdir(option["-d"][1]):
-        submit_directory(option["-d"][1], client)
+        submit_directory(option["-d"][1], client, d, option['-o'][1])
 
     elif option['-f'][0] and path.isfile(option['-f'][1]):
         res = submit_file(option["-f"][1])
@@ -99,24 +133,11 @@ if command['--submit']:
 
 elif command['--download']:
     #Pcap file downloader
-    d = Downloader(public_api+"v0/samples", auth_api_key)
     with open(option["-f"][1],mode='r') as csv_file:
         content = csv.DictReader(csv_file)
-        d.download(content,'behavioral1', option['-o'][1])
+        d.download_from_csv(content,'behavioral1', option['-o'][1])
 
 # List all owned_samples
 #for r in client.owned_samples():
 #    print("filename: {0} id: {1}".format(r['filename'], r['id']))
 #
-## Logging
-#with open('logs/test.csv', 'w') as f:
-#    # create the csv writer
-#    writer = csv.writer(f)
-#
-#    header = ['Filename', 'Sample_id', 'mb5_hash']
-#    data = ['KiffAppE2.bin', '220928-zc965aabdn', 'db5cc5204a082888533280e4cb9099b0']
-#    data2 = ['220925-wx71qaghdr_pw_infected.zip', '220927-yhag1sfdgr', '66b39f02f8aab03e7d6b0cdc63eb2718']
-#    # write a row to the csv file
-#    writer.writerow(header)
-#    writer.writerow(data)
-#    writer.writerow(data2)
