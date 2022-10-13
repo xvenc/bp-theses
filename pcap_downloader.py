@@ -1,7 +1,7 @@
 from requests import Session
 from os import path
 from pathlib import Path
-
+from general import bcolors
 
 class Downloader:
 
@@ -9,13 +9,13 @@ class Downloader:
         self.url = url
         self.token = auth_token
 
-    def _download_pcap(self, sample_id, taksk_id, outpud_dir, filename):
+    def _download_pcap(self, sample_id, taksk_id, output_dir, filename):
         s = Session()
         headers = {'Authorization': 'Bearer {0}'.format(self.token)}
         data = s.get(url= self.url + f"{sample_id}/{taksk_id}/dump.pcap",headers=headers).content
-        if not path.isdir(outpud_dir):
-            Path(outpud_dir).mkdir(parents=True, exist_ok=True)
-        with open("%s/%s.pcap" % (outpud_dir,path.splitext(filename)[0]), "wb") as wf:
+        if not path.isdir(output_dir):
+            Path(output_dir).mkdir(parents=True, exist_ok=True)
+        with open("%s/%s.pcap" % (output_dir,path.splitext(filename)[0]), "wb") as wf:
                     wf.write(data)
         return True
 
@@ -23,9 +23,9 @@ class Downloader:
         for row in csv:
             res = self._download_pcap(row['Sample_id'], task_id, outpud_dir, row['Filename'])
             if res:
-                print("Pcap for {0} downloaded.".format(row['Filename']))
+                print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE+ "{0}.".format(row['Filename']) + bcolors.ENDC)
 
     def download_sample(self, sample_id, task_id, outpud_dir, filename):
         res  = self._download_pcap(sample_id, task_id, outpud_dir, filename)
         if res:
-            print("Pcap for {0} downloaded.".format(filename))
+            print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE + "{0} .".format(filename) + bcolors.ENDC)
