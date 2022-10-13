@@ -1,5 +1,6 @@
 from requests import Session
-from os import path, mkdir
+from os import path
+from pathlib import Path
 
 
 class Downloader:
@@ -11,9 +12,9 @@ class Downloader:
     def _download_pcap(self, sample_id, taksk_id, outpud_dir, filename):
         s = Session()
         headers = {'Authorization': 'Bearer {0}'.format(self.token)}
-        data = s.get(url= self. url + f"{sample_id}/{taksk_id}/dump.pcap",headers=headers).content
+        data = s.get(url= self.url + f"{sample_id}/{taksk_id}/dump.pcap",headers=headers).content
         if not path.isdir(outpud_dir):
-            mkdir(outpud_dir)
+            Path(outpud_dir).mkdir(parents=True, exist_ok=True)
         with open("%s/%s.pcap" % (outpud_dir,path.splitext(filename)[0]), "wb") as wf:
                     wf.write(data)
         return True

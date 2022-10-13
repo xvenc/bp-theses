@@ -1,5 +1,5 @@
 import triage
-from os import path, listdir
+from os import path, listdir, walk
 import sys
 import getopt
 from hashlib import md5
@@ -12,6 +12,17 @@ public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
 log_dir = "logs/"
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def help():
     print("Usage: python3 triage_client [COMMAND] [OPTION]\n")
     print("Command:")
@@ -21,18 +32,20 @@ def help():
     print("\t-d\tSpecifies directory with malware samples.")
     print("\t-f\tSpecifies one malware sample.")
     print("\t-p\tSets password for zip/tar protected files.")
+    print('\t-o\tSpecifies output directory name for dowloaded pcaps')
     print("\n  --download\tDownload all files from specified .csv file")
     print("\n  Download options:")
     print("\t-f\tSpecifies one .csv file with informations about samples.")
     print('\t-d\tSpecifies output directory name for dowloaded pcaps')
+    print("Log files are automaticaly created. The file name is based on the input directory")
 
 # parse command line arguments
 def arg_parse():
-    command = {'--submit' : False, '--download' : False}
+    command = {'--submit' : False, '--download' : False, '--now' : False}
     option = {'-d' : [False,""], '-f' : [False,""], '-p' : [False, ""],
                  '-o': [False, ""]}
     try:
-        options, args = getopt.getopt(sys.argv[1:], "d:f:p:o:", ["help", "submit", "download"])
+        options, args = getopt.getopt(sys.argv[1:], "d:f:p:o:", ["help", "submit", "download", "now"])
     except:
         help()
         sys.exit(1)
@@ -91,6 +104,7 @@ def check_submited(filepath : str) -> bool:
 # function to submit simple file using triage API
 def submit_file(filepath : str):
     filename = path.basename(filepath)
+    # check if file was already submitted
    # if check_submited(filepath):
    #     response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, None)
    #     return response
@@ -99,22 +113,28 @@ def submit_file(filepath : str):
     return response
 
 # function to submit all files from a directory
-def submit_directory(directory, client : triage.Client, d, output_dir):
-    log_f= create_file_name(directory)
-    write_header(log_f)
-    for file in listdir(directory):
-        f = path.join(directory, file)
-        # checking if it is a file
-        if path.isfile(f):
-            res = submit_file(f)
-            # TODO wait til sample is submited
-            print("Submitted malware {0}".format(res['filename']))
-            time.sleep(230)
-            if client.sample_by_id(res['id'])['status'] == 'reported':
-                log(res['id'], res['filename'], log_f)
-                d.download_sample(res['id'], 'behavioral1', output_dir, res['filename'])
-
-
+def submit_directory(opt, client : triage.Client, d, cmd):
+    for subdir, dirs, files in walk(opt['-d'][1]):
+        # check if directory contain files, not only other directories
+        if files == []:
+            continue
+        print(bcolors.HEADER + "Submitting files from directory: " +bcolors.OKBLUE + f"{subdir}" + bcolors.ENDC)
+        log_f= create_file_name(subdir)
+        write_header(log_f)
+        for file in files:        #listdir(opt["-d"][1]):
+            f = path.join(subdir, file)
+            # checking if it is a file
+            if path.isfile(f):
+                res = submit_file(f)
+                print("Submitted malware: " + bcolors.OKBLUE + "{0}".format(res['filename']) + bcolors.ENDC)
+                # download pcap files after sumbiting
+                if cmd['--now']:
+                    while True:
+                        time.sleep(100)
+                        if client.sample_by_id(res['id'])['status'] == 'reported':
+                            log(res['id'], res['filename'], log_f)
+                            d.download_sample(res['id'], 'behavioral1', opt['-o'][1]+subdir, res['filename'])
+                            break;
 
 # MAIN
 
@@ -125,7 +145,7 @@ d = Downloader(public_api+"v0/samples", auth_api_key)
 
 if command['--submit']:
     if option['-d'][0] and path.isdir(option["-d"][1]):
-        submit_directory(option["-d"][1], client, d, option['-o'][1])
+        submit_directory(option, client, d, command)
 
     elif option['-f'][0] and path.isfile(option['-f'][1]):
         res = submit_file(option["-f"][1])
