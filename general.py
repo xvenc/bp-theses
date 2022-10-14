@@ -32,8 +32,8 @@ def help():
     print(bcolors.OKCYAN+"  --all options:"+bcolors.ENDC)
     print("\t-m\tSpecifies malware family.")
     print("\t-l\tSpecifies how many samples of given family we want.")
-    print('\t-o\tSpecifies output directory name for dowloaded pcaps')
-    print("\t-d\tSpecifies output directory for malware samples.")
+    print('\t-d\tSpecifies output directory name for dowloaded pcaps')
+    print("\t-o\tSpecifies output directory for malware samples.")
     print("Log files are automaticaly created. The file name is based on the input directory")
 
 
