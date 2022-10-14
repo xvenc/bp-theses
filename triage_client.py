@@ -15,7 +15,8 @@ log_dir = "logs/"
 
 # parse command line arguments
 def arg_parse():
-    command = {'--submit' : False, '--download' : False, '--now' : False, '--get' : False}
+    command = {'--submit' : False, '--download' : False, '--now' : False, '--get' : False,
+               '--all' : False}
     option = {'-d' : [False,""], '-f' : [False,""], '-p' : [False, ""],
               '-o': [False, ""], '-m' : [False,""], '-l' : [False, ""]}
     try:
