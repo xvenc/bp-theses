@@ -22,7 +22,7 @@ def help():
     print("\n  --download\tDownload all files from specified .csv file")
     print("\n  Download options:")
     print("\t-f\tSpecifies one .csv file with informations about samples.")
-    print('\t-d\tSpecifies output directory name for dowloaded pcaps')
+    print('\t-o\tSpecifies output directory name for dowloaded pcaps')
     print("Log files are automaticaly created. The file name is based on the input directory")
 
 

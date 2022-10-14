@@ -5,7 +5,7 @@ import getopt
 from pcap_downloader import Downloader
 from sample_downloader import SampleDownloader
 import time
-from general import *
+from general import bcolors, help
 from csv_writer import create_file_name, write_header, log
 import csv
 
@@ -43,11 +43,15 @@ def arg_parse():
 # function to submit simple file using triage API
 def submit_file(filepath : str):
     filename = path.basename(filepath)
-    response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
+    try:
+        response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
+    except:
+        print(bcolors.FAIL + "Error: Couldnt set http request")
+        exit(1)
     return response
 
 # function to submit all files from a directory
-def submit_directory(opt, client : triage.Client, d, cmd):
+def submit_directory(opt, client, d, cmd):
     for subdir, dirs, files in walk(opt['-d'][1]):
         # check if directory contain files, not only other directories
         if files == []:
@@ -86,7 +90,7 @@ if command['--submit']:
         res = submit_file(option["-f"][1])
         print(res)
 
-#Pcap file downloader
+# Download pcap files from specified csv file
 elif command['--download']:
     with open(option["-f"][1],mode='r') as csv_file:
         content = csv.DictReader(csv_file)
@@ -96,3 +100,17 @@ elif command['--download']:
 elif command['--get']:
     samples_json = sample_down.get_query(option['-m'][1], int(option['-l'][1]))
     sample_down.download_samples(samples_json,option['-o'][1], option['-m'][1])
+
+# Download samples for specific family from malware bazaar
+# then upload the samples to tria.ge to analysis and dowloading
+# corresponding pcap files
+# TODO change options
+elif command['--all']:
+    # Download samples
+    data_json = sample_down.get_query(option['-m'][1], int(option['-l'][1]))
+    sample_down.download_samples(data_json, option['-o'][1], option['-m'][1])
+    # Submit and download samples
+    if option['-d'][0] and path.isdir(option["-d"][1]):
+        submit_directory(option, client, d, command)
+
+

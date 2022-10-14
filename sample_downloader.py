@@ -24,12 +24,16 @@ class SampleDownloader:
             'signature': ''+family+'',
             'limit' : limit
         }
-        res = requests.post(self.url,data=data,timeout=15)
+        try:
+            res = requests.post(self.url,data=data,timeout=15)
+        except:
+            print(bcolors.FAIL + "Error. HTTPS request timeouted.")
+            exit(1)
         res_json = res.json()
         if res_json['query_status'] == 'ok':
-            print(bcolors.OKCYAN + f"Downloaded {limit} samples for family " + bcolors.OKBLUE + family + bcolors.ENDC)
+            print(bcolors.OKCYAN + f"Queried {limit} samples for family " + bcolors.OKBLUE + family + bcolors.ENDC)
         else:
-            print(bcolors.FAIL + "Error while downloading the samples. Exiting...")
+            print(bcolors.FAIL + "Error while quering the samples. Ilegal signature")
             exit(1)
         return res_json
     def download_samples(self, query_json, out_dir, family):
@@ -39,7 +43,14 @@ class SampleDownloader:
                 'query' : 'get_file',
                 'sha256_hash' : sample['sha256_hash']
             }
-            res = requests.post(self.url, data=data, timeout=15)
+            try:
+                res = requests.post(self.url, data=data, timeout=15)
+            except:
+                print(bcolors.FAIL + "Error. HTTPS request timeouted.")
+                exit(1)
+            if res.status_code != 200:
+                print(bcolors.FAIL + "Error. Couldnt download samples.")
+                exit(1)
             self._store_sample(out_dir, family, res, sample['sha256_hash'])
 
 

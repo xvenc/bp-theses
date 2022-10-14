@@ -21,7 +21,11 @@ class Downloader:
 
     def download_from_csv(self, csv, task_id, outpud_dir):
         for row in csv:
-            res = self._download_pcap(row['Sample_id'], task_id, outpud_dir, row['Filename'])
+            try:
+                res = self._download_pcap(row['Sample_id'], task_id, outpud_dir, row['Filename'])
+            except:
+                print(bcolors.FAIL + "ERROR: Couldnt download pcap files")
+                exit(1)
             if res:
                 print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE+ "{0}.".format(row['Filename']) + bcolors.ENDC)
 
