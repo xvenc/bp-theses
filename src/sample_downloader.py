@@ -1,7 +1,7 @@
 import requests
 from os import path, mkdir
 from pathlib import Path
-from general import bcolors
+from src.general import bcolors
 
 class SampleDownloader:
 
@@ -31,7 +31,7 @@ class SampleDownloader:
             return "", 1
         res_json = res.json()
         if res_json['query_status'] == 'ok':
-            print(bcolors.OKCYAN + f"Queried {limit} samples for family " + bcolors.OKBLUE + family 
+            print(bcolors.OKCYAN + f"Queried {limit} samples for family " + bcolors.OKBLUE + family
                   + bcolors.OKCYAN + ". Now the samples will be downloaded."+ bcolors.ENDC)
         else:
             print(bcolors.FAIL + "Error while quering the samples. Ilegal signature")
@@ -54,6 +54,6 @@ class SampleDownloader:
                 print(bcolors.FAIL + "Error. Couldnt download samples.")
                 return 1
             self._store_sample(out_dir, family, res, sample['sha256_hash'])
-        return 1
+        return 0
 
 

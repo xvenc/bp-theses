@@ -2,12 +2,12 @@ import triage
 from os import path, walk
 import sys
 import getopt
+import csv
+import time
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
-import time
 from src.general import bcolors, help
 from src.csv_writer import create_file_name, write_header, log
-import csv
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
@@ -82,12 +82,13 @@ def submit_directory(opt, client, d, cmd):
                         except:
                             print(bcolors.FAIL + "Couldnt download pcap." + bcolors.ENDC)
                             break;
+                        # check if sample analysis was reported
                         if  status == 'reported':
                             log(res['id'], res['filename'], log_f, client, log_dir)
                             d.download_sample(res['id'], 'behavioral1', pcap_dir+subdir, res['filename'])
                             break;
                         else:
-                            time.sleep(120)
+                            time.sleep(60)
     return
 
 # MAIN
@@ -129,7 +130,7 @@ elif command['--get']:
 elif command['--all']:
     # Download samples
     data_json, err = sample_down.get_query(option['-m'][1], int(option['-l'][1]))
-    if err:
+    if err == 1:
         print(bcolors.FAIL + "Couldnt query samples for family " + bcolors.ENDC + option['-m'][1])
         #continue
         exit(1)
