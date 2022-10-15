@@ -2,4 +2,5 @@ triage/
 malware/
 logs/
 pcaps/
+backup/
 __pycache__/
