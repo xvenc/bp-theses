@@ -8,8 +8,7 @@ class Downloader:
     def __init__(self, url : str, auth_token : str):
         self.url = url
         self.token = auth_token
-    
-    # TODO do it safely and return falsi if fail
+
     def _download_pcap(self, sample_id, taksk_id, output_dir, filename):
         s = Session()
         headers = {'Authorization': 'Bearer {0}'.format(self.token)}

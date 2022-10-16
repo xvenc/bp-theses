@@ -16,7 +16,7 @@ class SampleDownloader:
         with open(out_dir+family+'/'+hash256+'.zip', 'wb') as wf:
             wf.write(res.content)
 
-        print(bcolors.OKGREEN + "Downloaded malware sample for family: " + bcolors.OKBLUE + family + bcolors.ENDC)
+        print(bcolors.OKGREEN + "Downloaded malware sample: " + bcolors.OKBLUE + hash256+".zip" + bcolors.ENDC)
 
     def get_query(self, family, limit = 10):
         data = {

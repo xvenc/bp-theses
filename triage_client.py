@@ -7,7 +7,7 @@ import time
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
 from src.general import bcolors, help
-from src.csv_writer import create_file_name, write_header, log
+from src.csv_writer import check_recorded, create_file_name, write_header, log
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
@@ -47,9 +47,27 @@ def submit_file(filepath : str):
     try:
         response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
     except:
-        print(bcolors.FAIL + "Error: Couldnt set http request")
+        print(bcolors.FAIL + "Error: Couldnt sent http request")
         exit(1)
     return response
+
+# function to wait for the analysis to be done and then download the pcap
+def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir):
+    while True:
+        try:
+            status = client.sample_by_id(res['id'])['status']
+        except:
+            print(bcolors.FAIL + "Couldnt download pcap." + bcolors.ENDC)
+            break;
+        # check if sample analysis was reported
+        if  status == 'reported':
+            log(res['id'], res['filename'], log_f, client, log_dir)
+            print()
+            d.download_sample(res['id'], 'behavioral1', pcap_dir+subdir, res['filename'])
+            break;
+        else:
+            print(".", end="")
+            time.sleep(60)
 
 def check_dir(directory):
     if directory[-1] != '/':
@@ -68,27 +86,17 @@ def submit_directory(opt, client, d, cmd):
         print(bcolors.HEADER + "Submitting files from directory: " +bcolors.OKBLUE + f"{subdir}" + bcolors.ENDC)
         log_f= create_file_name(subdir)
         write_header(log_f, log_dir)
-        for file in files:        #listdir(opt["-d"][1]):
+        # iterate trough files in directory
+        for file in files:
             f = path.join(subdir, file)
             # checking if it is a file
-            if path.isfile(f):
+            if path.isfile(f) and not check_recorded(log_f, log_dir, f):
                 res = submit_file(f)
                 print("Submitted malware: " + bcolors.OKBLUE + "{0}".format(res['filename']) + bcolors.ENDC)
                 # download pcap files after sumbiting
                 if cmd['--now']:
-                    while True:
-                        try:
-                            status = client.sample_by_id(res['id'])['status']
-                        except:
-                            print(bcolors.FAIL + "Couldnt download pcap." + bcolors.ENDC)
-                            break;
-                        # check if sample analysis was reported
-                        if  status == 'reported':
-                            log(res['id'], res['filename'], log_f, client, log_dir)
-                            d.download_sample(res['id'], 'behavioral1', pcap_dir+subdir, res['filename'])
-                            break;
-                        else:
-                            time.sleep(60)
+                    print("Downloading",end="")
+                    download_pcap(client, res, log_f, log_dir, pcap_dir, subdir)
     return
 
 # MAIN
@@ -122,11 +130,9 @@ elif command['--get']:
     if sample_down.download_samples(samples_json,option['-d'][1], option['-m'][1]):
         print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + option['-m'][1])
 
-
 # Download samples for specific family from malware bazaar
 # then upload the samples to tria.ge to analysis and dowloading
 # corresponding pcap files
-# TODO dont download already submitted samples
 elif command['--all']:
     # Download samples
     data_json, err = sample_down.get_query(option['-m'][1], int(option['-l'][1]))
