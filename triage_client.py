@@ -61,15 +61,18 @@ def read_lines(file):
 # function to submit simple file using triage API
 def submit_file(filepath : str):
     filename = path.basename(filepath)
-    try:
-        response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
-    except:
-        print(bcolors.FAIL + "Error: Couldnt sent http request")
-        exit(1)
+    response = ""
+    if path.isfile(filepath):
+        print("HERE")
+        try:
+            response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
+        except:
+            print(bcolors.FAIL + "Error: Couldnt sent http request")
     return response
 
 # function to wait for the analysis to be done and then download the pcap
 def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d):
+    print("Downloading",end="")
     while True:
         try:
             status = client.sample_by_id(res['id'])['status']
@@ -78,7 +81,8 @@ def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d):
             break;
         # check if sample analysis was reported
         if  status == 'reported':
-            log(res['id'], res['filename'], log_f, client, log_dir)
+            if not (log_dir == "" or log_f == ""):
+                log(res['id'], res['filename'], log_f, client, log_dir)
             print()
             d.download_sample(res['id'], 'behavioral1', pcap_dir+subdir, res['filename'])
             break;
@@ -108,10 +112,11 @@ def submit_directory(opt, client, d, cmd, family):
             # checking if it is a file
             if path.isfile(f) and not check_recorded(log_f, log_dir, f):
                 res = submit_file(f)
+                if res == "":
+                    continue
                 print("Submitted malware: " + bcolors.OKBLUE + "{0}".format(res['filename']) + bcolors.ENDC)
                 # download pcap files after sumbiting
                 if cmd['--now']:
-                    print("Downloading",end="")
                     download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d)
             else:
                 print(bcolors.OKBLUE + file + bcolors.ENDC + bcolors.BOLD + " was already downloaded")
@@ -132,6 +137,8 @@ if command['--submit']:
     elif option['-f'][0] and path.isfile(option['-f'][1]):
         res = submit_file(option["-f"][1])
         print(res)
+        if option['-o'][0]:
+            download_pcap(client, res, "","",option['-o'][1],"",d)
 
 # Download pcap files from specified csv file
 elif command['--download']:

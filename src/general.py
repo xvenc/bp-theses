@@ -30,7 +30,7 @@ def help():
     print('\t-d\tSpecifies output directory name for dowloaded samples')
     print(bcolors.OKBLUE+"\n  --all"+bcolors.ENDC+"\tDownloads n malware samples of specified family and runs analysis and than stores the pcap files")
     print(bcolors.OKCYAN+"  --all options:"+bcolors.ENDC)
-    print("\t-m\tSpecifies malware family.")
+    print("\t-m\tSpecifies malware family. Or .txt file with malware family names each on new line of the file")
     print("\t-l\tSpecifies how many samples of given family we want.")
     print('\t-o\tSpecifies output directory name for dowloaded pcaps')
     print("\t-d\tSpecifies output directory for malware samples.")
