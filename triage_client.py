@@ -41,6 +41,23 @@ def arg_parse():
 
     return command,option
 
+# read lines from malware family file
+def read_lines(file):
+    data = list()
+    if file != None:
+        try:
+            f = open(file,"r")
+            data = f.readlines()
+        except:
+            data.append(file)
+            print("Download one family "+file)
+    else:
+        print(bcolors.FAIL + "Family not specified" + bcolors.ENDC)
+        exit(1)
+    data = [l.strip() for l in data]
+    return data
+
+
 # function to submit simple file using triage API
 def submit_file(filepath : str):
     filename = path.basename(filepath)
@@ -52,7 +69,7 @@ def submit_file(filepath : str):
     return response
 
 # function to wait for the analysis to be done and then download the pcap
-def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir):
+def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d):
     while True:
         try:
             status = client.sample_by_id(res['id'])['status']
@@ -75,10 +92,9 @@ def check_dir(directory):
     return directory
 
 # function to submit all files from a directory
-def submit_directory(opt, client, d, cmd):
+def submit_directory(opt, client, d, cmd, family):
     malware_dir = check_dir(opt['-d'][1])
     pcap_dir = check_dir(opt['-o'][1])
-    family = opt['-m'][1]
     for subdir, dirs, files in walk(malware_dir+family):
         # check if directory contain files, not only other directories
         if files == []:
@@ -96,7 +112,9 @@ def submit_directory(opt, client, d, cmd):
                 # download pcap files after sumbiting
                 if cmd['--now']:
                     print("Downloading",end="")
-                    download_pcap(client, res, log_f, log_dir, pcap_dir, subdir)
+                    download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d)
+            else:
+                print(bcolors.OKBLUE + file + bcolors.ENDC + bcolors.BOLD + " was already downloaded")
     return
 
 # MAIN
@@ -109,7 +127,7 @@ sample_down = SampleDownloader()
 # submit file or whole directory with files
 if command['--submit']:
     if option['-d'][0] and path.isdir(option["-d"][1]):
-        submit_directory(option, client, d, command)
+        submit_directory(option, client, d, command, "")
 
     elif option['-f'][0] and path.isfile(option['-f'][1]):
         res = submit_file(option["-f"][1])
@@ -134,19 +152,18 @@ elif command['--get']:
 # then upload the samples to tria.ge to analysis and dowloading
 # corresponding pcap files
 elif command['--all']:
-    # Download samples
-    data_json, err = sample_down.get_query(option['-m'][1], int(option['-l'][1]))
-    if err == 1:
-        print(bcolors.FAIL + "Couldnt query samples for family " + bcolors.ENDC + option['-m'][1])
-        #continue
-        exit(1)
-    if sample_down.download_samples(data_json, option['-d'][1], option['-m'][1]):
-        print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + option['-m'][1])
-        #continue
-        exit(1)
-
-    # Submit and download samples
-    if option['-d'][0] and path.isdir(option["-d"][1]):
-        submit_directory(option, client, d, command)
-
+    data = read_lines(option['-m'][1])
+    for family in data:
+        # Download samples
+        data_json, err = sample_down.get_query(family, int(option['-l'][1]))
+        if err == 1:
+            print(bcolors.FAIL + "Couldnt query samples for family " + bcolors.ENDC + family)
+            continue
+            #exit(1)
+        if sample_down.download_samples(data_json, option['-d'][1], family):
+            print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + family)
+            continue
+        # Submit and download samples
+        if option['-d'][0] and path.isdir(option["-d"][1]):
+            submit_directory(option, client, d, command, family)
 

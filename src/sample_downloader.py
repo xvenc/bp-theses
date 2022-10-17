@@ -25,7 +25,7 @@ class SampleDownloader:
             'limit' : limit
         }
         try:
-            res = requests.post(self.url,data=data,timeout=15)
+            res = requests.post(self.url,data=data,timeout=120)
         except:
             print(bcolors.FAIL + "Error. HTTPS request timeouted.")
             return "", 1
@@ -46,7 +46,7 @@ class SampleDownloader:
                 'sha256_hash' : sample['sha256_hash']
             }
             try:
-                res = requests.post(self.url, data=data, timeout=30)
+                res = requests.post(self.url, data=data, timeout=120)
             except:
                 print(bcolors.FAIL + "Error. HTTPS request timeouted.")
                 return 1

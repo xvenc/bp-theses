@@ -4,3 +4,4 @@ logs/
 pcaps/
 backup/
 __pycache__/
+*.txt
