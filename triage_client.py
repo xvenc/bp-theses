@@ -8,7 +8,6 @@ import json
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
 from src.general import bcolors, help
-from src.csv_writer import check_recorded, create_file_name, write_header, log
 from src.report import create_folder, create_file, create_report, create_malware_folder, check_downloaded
 
 public_api = "https://api.tria.ge/"
@@ -73,7 +72,7 @@ def submit_file(filepath : str):
     return response
 
 # function to wait for the analysis to be done and then download the pcap
-def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d):
+def download_pcap(client, res, pcap_dir, subdir, d):
     print("Downloading",end="")
     while True:
         try:
@@ -83,8 +82,6 @@ def download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d):
             break;
         # check if sample analysis was reported
         if  status == 'reported':
-            if not (log_dir == "" or log_f == ""):
-                log(res['id'], res['filename'], log_f, client, log_dir)
             print()
             d.download_sample(res['id'], 'behavioral1', pcap_dir+subdir, res['filename'])
             break;
@@ -97,16 +94,14 @@ def check_dir(directory):
         directory += '/'
     return directory
 
-def report(client, res, report_dir, f):
+def report(client, res, report_dir, report_file):
     try:
         report = client.overview_report(res['id'])
     except:
         print(bcolors.FAIL + "Couldnt download report." + bcolors.ENDC)
         return
-    create_malware_folder(report_dir)
-    log_f = create_file(path.splitext(report['sample']['target'])[0]) 
-    create_report(report, log_f, report_dir) 
-    check_downloaded(report_dir, log_f, f)
+     
+    create_report(report, report_file, report_dir) 
 
 
 # function to submit all files from a directory
@@ -119,22 +114,23 @@ def submit_directory(opt, client, d, cmd, family):
         if files == []:
             continue
         print(bcolors.HEADER + "Submitting files from directory: " +bcolors.OKBLUE + f"{subdir}" + bcolors.ENDC)
-        log_f= create_file_name(subdir)
-        write_header(log_f, log_dir)
+        create_malware_folder(report_dir+subdir) #NEW
         # iterate trough files in directory
         for file in files:
             f = path.join(subdir, file)
             # checking if it is a file and wasnt already downloaded
-            if path.isfile(f) and not check_recorded(log_f, log_dir, f):
+            if path.isfile(f) and not check_downloaded(report_dir+subdir, f):
                 res = submit_file(f)
                 if res == "":
                     continue
                 print("Submitted malware: " + bcolors.OKBLUE + "{0}".format(res['filename']) + bcolors.ENDC)
 
+                report_f = create_file(path.splitext(res['filename'])[0])
+
                 # download pcap files after sumbiting
                 if cmd['--now']:
-                    download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d)
-                    report(client, res, report_dir+subdir, f) 
+                    download_pcap(client, res, pcap_dir, subdir, d)
+                    report(client, res, report_dir+subdir, report_f) 
             else:
                 print(bcolors.OKBLUE + file + bcolors.ENDC + bcolors.BOLD + " was already downloaded")
     return
@@ -190,5 +186,3 @@ elif command['--all']:
         # Submit and download samples
         if option['-d'][0] and path.isdir(option["-d"][1]):
             submit_directory(option, client, d, command, family)
-
-#report(client, "221105-m8vp4afec2")

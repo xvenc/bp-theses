@@ -1,5 +1,5 @@
 import json
-from os import path
+from os import path, listdir
 from pathlib import Path
 
 def create_folder(directory):
@@ -27,8 +27,9 @@ def create_report(report, log_f, log_dir):
     with open(log_dir+'/'+log_f, "w") as outfile:
         outfile.write(json_object)
 
-def check_downloaded(log_dir, log_f, f):
-    for file in log_dir:
-        print(path.splitext(log_f)[0]) 
-        print(path.splitext(f)[0]) 
+def check_downloaded(log_dir, f):
+    f_base = path.basename(f)
+    for file in listdir(log_dir):
+        if path.splitext(file)[0] == path.splitext(f_base)[0]:
+            return True
     return False
