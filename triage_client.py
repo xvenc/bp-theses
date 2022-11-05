@@ -4,14 +4,17 @@ import sys
 import getopt
 import csv
 import time
+import json
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
 from src.general import bcolors, help
 from src.csv_writer import check_recorded, create_file_name, write_header, log
+from src.report import create_folder, create_file, create_report, create_malware_folder, check_downloaded
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
 log_dir = "logs/"
+report_dir = "reports/"
 
 # parse command line arguments
 def arg_parse():
@@ -63,7 +66,6 @@ def submit_file(filepath : str):
     filename = path.basename(filepath)
     response = ""
     if path.isfile(filepath):
-        print("HERE")
         try:
             response = client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
         except:
@@ -95,10 +97,23 @@ def check_dir(directory):
         directory += '/'
     return directory
 
+def report(client, res, report_dir, f):
+    try:
+        report = client.overview_report(res['id'])
+    except:
+        print(bcolors.FAIL + "Couldnt download report." + bcolors.ENDC)
+        return
+    create_malware_folder(report_dir)
+    log_f = create_file(path.splitext(report['sample']['target'])[0]) 
+    create_report(report, log_f, report_dir) 
+    check_downloaded(report_dir, log_f, f)
+
+
 # function to submit all files from a directory
 def submit_directory(opt, client, d, cmd, family):
     malware_dir = check_dir(opt['-d'][1])
     pcap_dir = check_dir(opt['-o'][1])
+    create_folder(report_dir)
     for subdir, dirs, files in walk(malware_dir+family):
         # check if directory contain files, not only other directories
         if files == []:
@@ -109,15 +124,17 @@ def submit_directory(opt, client, d, cmd, family):
         # iterate trough files in directory
         for file in files:
             f = path.join(subdir, file)
-            # checking if it is a file
+            # checking if it is a file and wasnt already downloaded
             if path.isfile(f) and not check_recorded(log_f, log_dir, f):
                 res = submit_file(f)
                 if res == "":
                     continue
                 print("Submitted malware: " + bcolors.OKBLUE + "{0}".format(res['filename']) + bcolors.ENDC)
+
                 # download pcap files after sumbiting
                 if cmd['--now']:
                     download_pcap(client, res, log_f, log_dir, pcap_dir, subdir, d)
+                    report(client, res, report_dir+subdir, f) 
             else:
                 print(bcolors.OKBLUE + file + bcolors.ENDC + bcolors.BOLD + " was already downloaded")
     return
@@ -174,3 +191,4 @@ elif command['--all']:
         if option['-d'][0] and path.isdir(option["-d"][1]):
             submit_directory(option, client, d, command, family)
 
+#report(client, "221105-m8vp4afec2")

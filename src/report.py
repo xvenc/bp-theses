@@ -1,0 +1,34 @@
+import json
+from os import path
+from pathlib import Path
+
+def create_folder(directory):
+    if directory[-1] != '/':
+            directory += '/'
+    if not path.isdir(directory):
+        Path(directory).mkdir(parents=True, exist_ok=True)
+
+def create_file(directory):
+    log_f = directory.replace('/','_')
+    if log_f.endswith('_'):
+        log_f = log_f[:-1] + ".json"
+    else:
+        log_f = log_f + ".json"
+    return log_f
+
+def create_malware_folder(directory):
+    if directory[-1] != '/':
+        directory += '/'
+    if not path.isdir(directory):
+        Path(directory).mkdir(parents=True, exist_ok=True)
+
+def create_report(report, log_f, log_dir):
+    json_object = json.dumps(report, indent=4)
+    with open(log_dir+'/'+log_f, "w") as outfile:
+        outfile.write(json_object)
+
+def check_downloaded(log_dir, log_f, f):
+    for file in log_dir:
+        print(path.splitext(log_f)[0]) 
+        print(path.splitext(f)[0]) 
+    return False
