@@ -21,15 +21,15 @@ class Downloader:
                     wf.write(data)
         return True
 
-    def download_from_csv(self, csv, task_id, outpud_dir):
-        for row in csv:
-            try:
-                res = self._download_pcap(row['Sample_id'], task_id, outpud_dir, row['Filename'])
-            except:
-                print(bcolors.FAIL + "ERROR: Couldnt download pcap files")
-                exit(1)
-            if res:
-                print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE+ "{0}".format(row['Filename']) + bcolors.ENDC)
+    def download_from_report(self, data, outpud_dir, filename):
+        try:
+            res = self._download_pcap(data['sample']['id'], "behavioral1",
+                                      outpud_dir, filename)
+        except:
+            print(bcolors.FAIL + "ERROR: Couldnt download pcap files")
+            exit(1)
+        if res:
+            print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE+ "{0}".format(filename) + bcolors.ENDC)
 
     def download_sample(self, sample_id, task_id, outpud_dir, filename):
         res  = self._download_pcap(sample_id, task_id, outpud_dir, filename)

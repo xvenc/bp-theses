@@ -18,25 +18,25 @@ Usage: python3 triage_client.py [COMMAND] [OPTIONS]
 Commands:
     --help          Show this help message and exists 
     --submit	    Submit file or whole directory to tria.ge
-    options for submit:
+    Options for submit:
         -d	Specifies directory with malware samples. (Can't combine with -f)
         -f	Specifies one malware sample. (Can't combine with -d)
         -o	Specifies output directory name for dowloaded pcaps
 
     --download	    Download all files from specified report directory
-    options for download:
-        -f	Specifies one folder with report files.
+    Options for download:
+        -d	Specifies one folder with report files. Folder mustn't contain other folders.
         -o	Specifies output directory name for dowloaded pcaps
 
     --get	Downloads n malware samples of specified family
-    options for get:
+    Options for get:
         -m	Specifies malware family.
         -l	Specifies how many samples of given family we want.
         -d	Specifies output directory name for dowloaded samples
         --now Immediately after submit downloads pcap files.
 
     --all	Downloads n malware samples of specified family and runs analysis and than stores the pcap files
-    options for all:
+    Options for all:
         -m	Specifies malware family. Or .txt file with malware family names each on new line of the file
         -l	Specifies how many samples of given family we want.
         -o	Specifies output directory name for dowloaded pcaps

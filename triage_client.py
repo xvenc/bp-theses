@@ -1,12 +1,13 @@
 import triage
-from os import path, walk
+from os import listdir, path, walk
 import sys
 import getopt
 import time
+import json
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
 from src.general import bcolors, help
-from src.report import create_folder, create_file, create_report, create_malware_folder, check_downloaded
+from src.report import *
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
@@ -154,10 +155,11 @@ if command['--submit']:
 
 # Download pcap files from specified report directory
 elif command['--download']:
-    pass
-    #with open(option["-f"][1],mode='r') as csv_file:
-    #    content = csv.DictReader(csv_file)
-    #    d.download_from_csv(content,'behavioral1', option['-o'][1])
+    option['-d'][1] = check_dir(option['-d'][1])
+    for file in listdir(option['-d'][1]):
+        with open(option['-d'][1]+file) as json_file:
+            data = json.load(json_file)
+            d.download_from_report(data, option['-o'][1], file)
 
 # download malware samples
 elif command['--get']:
@@ -165,6 +167,7 @@ elif command['--get']:
     if err:
         print(bcolors.FAIL + "Couldnt query samples for family " + bcolors.ENDC + option['-m'][1])
         exit(1)
+
     if sample_down.download_samples(samples_json,option['-d'][1], option['-m'][1].lower()):
         print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + option['-m'][1].lower())
 
@@ -179,10 +182,11 @@ elif command['--all']:
         if err == 1:
             print(bcolors.FAIL + "Couldnt query samples for family " + bcolors.ENDC + family)
             continue
-            #exit(1)
+
         if sample_down.download_samples(data_json, option['-d'][1], family):
             print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + family)
             continue
+
         # Submit and download samples
         if option['-d'][0] and path.isdir(option["-d"][1]):
             submit_directory(option, client, d, command, family)
