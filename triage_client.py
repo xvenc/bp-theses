@@ -2,9 +2,7 @@ import triage
 from os import path, walk
 import sys
 import getopt
-import csv
 import time
-import json
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
 from src.general import bcolors, help
@@ -12,7 +10,6 @@ from src.report import create_folder, create_file, create_report, create_malware
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
-log_dir = "logs/"
 report_dir = "reports/"
 
 # parse command line arguments
@@ -22,7 +19,7 @@ def arg_parse():
     option = {'-d' : [False,""], '-f' : [False,""], '-p' : [False, ""],
               '-o': [False, ""], '-m' : [False,""], '-l' : [False, ""]}
     try:
-        options, args = getopt.getopt(sys.argv[1:], "d:f:p:o:m:l:", ["help", "submit", "download", "now", "get", "all"])
+        options, args = getopt.getopt(sys.argv[1:], "d:f:o:m:l:", ["help", "submit", "download", "now", "get", "all"])
     except:
         help()
         sys.exit(1)
@@ -52,11 +49,11 @@ def read_lines(file):
             data = f.readlines()
         except:
             data.append(file)
-            print("Download one family "+file)
+            print("Download one family " + file)
     else:
         print(bcolors.FAIL + "Family not specified" + bcolors.ENDC)
         exit(1)
-    data = [l.strip() for l in data]
+    data = [l.strip().lower() for l in data]
     return data
 
 
@@ -100,8 +97,8 @@ def report(client, res, report_dir, report_file):
     except:
         print(bcolors.FAIL + "Couldnt download report." + bcolors.ENDC)
         return
-     
-    create_report(report, report_file, report_dir) 
+
+    create_report(report, report_file, report_dir)
 
 
 # function to submit all files from a directory
@@ -114,10 +111,12 @@ def submit_directory(opt, client, d, cmd, family):
         if files == []:
             continue
         print(bcolors.HEADER + "Submitting files from directory: " +bcolors.OKBLUE + f"{subdir}" + bcolors.ENDC)
-        create_malware_folder(report_dir+subdir) #NEW
-        # iterate trough files in directory
+        create_malware_folder(report_dir+subdir)
+
+        # iterate trough files in malware directory
         for file in files:
             f = path.join(subdir, file)
+
             # checking if it is a file and wasnt already downloaded
             if path.isfile(f) and not check_downloaded(report_dir+subdir, f):
                 res = submit_file(f)
@@ -130,7 +129,7 @@ def submit_directory(opt, client, d, cmd, family):
                 # download pcap files after sumbiting
                 if cmd['--now']:
                     download_pcap(client, res, pcap_dir, subdir, d)
-                    report(client, res, report_dir+subdir, report_f) 
+                    report(client, res, report_dir+subdir, report_f)
             else:
                 print(bcolors.OKBLUE + file + bcolors.ENDC + bcolors.BOLD + " was already downloaded")
     return
@@ -151,22 +150,23 @@ if command['--submit']:
         res = submit_file(option["-f"][1])
         print(res)
         if option['-o'][0]:
-            download_pcap(client, res, "","",option['-o'][1],"",d)
+            download_pcap(client, res, "",option['-o'][1],d)
 
-# Download pcap files from specified csv file
+# Download pcap files from specified report directory
 elif command['--download']:
-    with open(option["-f"][1],mode='r') as csv_file:
-        content = csv.DictReader(csv_file)
-        d.download_from_csv(content,'behavioral1', option['-o'][1])
+    pass
+    #with open(option["-f"][1],mode='r') as csv_file:
+    #    content = csv.DictReader(csv_file)
+    #    d.download_from_csv(content,'behavioral1', option['-o'][1])
 
 # download malware samples
 elif command['--get']:
-    samples_json, err = sample_down.get_query(option['-m'][1], int(option['-l'][1]))
+    samples_json, err = sample_down.get_query(option['-m'][1].lower(), int(option['-l'][1]))
     if err:
         print(bcolors.FAIL + "Couldnt query samples for family " + bcolors.ENDC + option['-m'][1])
         exit(1)
-    if sample_down.download_samples(samples_json,option['-d'][1], option['-m'][1]):
-        print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + option['-m'][1])
+    if sample_down.download_samples(samples_json,option['-d'][1], option['-m'][1].lower()):
+        print(bcolors.FAIL + "Couldnt download samples for family " + bcolors.ENDC + option['-m'][1].lower())
 
 # Download samples for specific family from malware bazaar
 # then upload the samples to tria.ge to analysis and dowloading
