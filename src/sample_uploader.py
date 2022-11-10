@@ -16,7 +16,6 @@ class Uploader:
 
     # function to wait for the analysis to be done and then download the pcap
     def _download_pcap(self, client, res, pcap_dir, subdir, d):
-        print("Downloading",end="")
         while True:
             try:
                 status = client.sample_by_id(res['id'])['status']
@@ -40,7 +39,7 @@ class Uploader:
             return
 
         create_report(report, report_file, report_dir)
-    
+
     # function to submit all files from a directory
     def submit_directory(self, opt, client, d, cmd, family):
         malware_dir = self._check_dir(opt['-d'][1])
@@ -68,6 +67,7 @@ class Uploader:
 
                     # download pcap files after sumbiting
                     if cmd['--now']:
+                        print("Downloading",end="")
                         self._download_pcap(client, res, pcap_dir, subdir, d)
                         self._report(client, res, self.report_dir+subdir, report_f)
                 else:

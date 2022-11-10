@@ -22,6 +22,7 @@ Commands:
         -d	Specifies directory with malware samples. (Can't combine with -f)
         -f	Specifies one malware sample. (Can't combine with -d)
         -o	Specifies output directory name for dowloaded pcaps
+		--now Immediately after submit downloads pcap files.
 
     --download	    Download all files from specified report directory
     Options for download:
@@ -33,7 +34,6 @@ Commands:
         -m	Specifies malware family.
         -l	Specifies how many samples of given family we want.
         -d	Specifies output directory name for dowloaded samples
-        --now Immediately after submit downloads pcap files.
 
     --all	Downloads n malware samples of specified family and runs analysis and than stores the pcap files
     Options for all:
@@ -49,13 +49,74 @@ COMMAND arguments can't be combined.
 ```
 ## Examples
 Here are some usage examples.
+All these individual examples consist of 3 part:
+* First is shown the content of the folder before the command is executed.
+* Command execution and output.
+* Folder contetn after the program execution.
+```
+Download malware, then upload to tria.ge and download pcaps
+$ ls
+example_family.txt  README.md  requirements.txt  src/  triage_client.py
 
+$ python3 triage_client.py --all -m example_family.txt -l 1 -d malware -o pcaps --now
+
+Queried 1 samples for family redlinestealer. Now the samples will be downloaded.
+Downloaded malware sample: malware1.zip
+Submitting files from directory: malware/redlinestealer
+Submitted malware: malware1.zip
+Downloading...
+Downloaded pcap for malware1.zip
+Queried 1 samples for family Mirai. Now the samples will be downloaded.
+Downloaded malware sample: malware2.zip
+Submitting files from directory: malware/mirai
+Submitted malware: malware2.zip
+Downloading...
+Downloaded pcap for malware2.zip
+Queried 1 samples for family Heodo. Now the samples will be downloaded.
+Downloaded malware sample: malware3.zip
+Submitting files from directory: malware/heodo
+Submitted malware: malware3.zip
+Downloading...
+Downloaded pcap for malware3.zip
+
+$ ls
+example_family.txt  malware/  pcaps/  README.md  reports/  requirements.txt  src/  triage_client.py
+```
+```
+Download malware samples for family redlinestealer
+$ ls 
+example_family.txt  README.md  requirements.txt  src/  triage_client.py
+
+$ python3 triage_client.py --get -m RedLineStealer -d malware/ -l 2
+
+Queried 2 samples for family redlinestealer. Now the samples will be downloaded.
+Downloaded malware sample: malware4.zip
+Downloaded malware sample: malware5.zip
+
+$ ls
+example_family.txt  malware/  README.md  requirements.txt  src/  triage_client.py
+```
+```
+Submit directory for analysis but dont download the samples
+$ ls 
+example_family.txt malware/  README.md  requirements.txt  src/  triage_client.py
+
+$ python3 triage_client.py --submit -d malware/redlinestealer/
+
+Submitting files from directory: malware/redlinestealer/
+Submitted malware: malware4.zip
+Submitted malware: malware5.zip
+
+$ ls
+xample_family.txt  malware/  README.md  reports/  requirements.txt  src/  triage_client.py
+
+```
 ## Struktura archivu
 * triage_client.py
 * src/general.py
 * src/report.py
 * src/pcap_downloader.py
 * src/sample_downloader.py
-* example_families.txt
+* example_family.txt
 * README.md 
 * requirements.txt
