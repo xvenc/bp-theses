@@ -28,14 +28,14 @@ def create_file_name(directory):
 # write csv header if csv file doest exists
 def write_header(file, log_dir):
     if not path.exists(log_dir+file):
-        header = ['Filename', 'Sample_id', 'md5_hash']
+        header = ['Filename', 'Sample_id']
         with open(log_dir+file, 'w') as f:
             writer = csv.writer(f)
             writer.writerow(header)
 
 # log sample id and from witch directory its from
 def log(sample_id : str, filename : str, log_f : str, client, log_dir):
-    data = [filename, sample_id, get_hash(sample_id, client)]
+    data = [filename, sample_id]
     with open(log_dir+log_f, 'a') as f:
         # create the csv writer
         writer = csv.writer(f)

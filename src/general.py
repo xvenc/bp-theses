@@ -38,3 +38,8 @@ def help():
     print("\nLog files are automaticaly created. The file name is based on the input directory")
 
 
+# check if directory end with '/'
+def check_dir(directory):
+    if directory[-1] != '/':
+        directory += '/'
+    return directory
