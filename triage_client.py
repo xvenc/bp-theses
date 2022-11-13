@@ -112,24 +112,28 @@ elif command['--all']:
         # Download samples
         data_json, err = sample_down.get_query(family, int(option['-l'][1]))
         if err == 1:
-            print(bcolors.FAIL + "Couldnt query samples for family " + 
+            print(bcolors.FAIL + "Couldnt query samples for family " +
             bcolors.ENDC + family)
             continue
-
-        if sample_down.download_samples(data_json, option['-d'][1], family.lower()):
-            print(bcolors.FAIL + "Couldnt download samples for family " + 
+        family = family.lower().replace(" ","")
+        if sample_down.download_samples(data_json, option['-d'][1], family):
+            print(bcolors.FAIL + "Couldnt download samples for family " +
             bcolors.ENDC + family)
             continue
 
         # Submit samples
         if option['-d'][0] and path.isdir(option["-d"][1]):
-            uploader.submit_directory(option, client, family.lower())
+            uploader.submit_directory(option, client, family)
 
     print("Downloading pcap for uploaded samples...")
-    time.sleep(300) 
+    time.sleep(300)
     # after all samples were submitted wait and download samples
     family_dict = get_families_from_logs(log_dir)
     for family in data:
-        if family.lower() in family_dict:
-            d.download_samples_for_directory(option['-d'][1], 
-            family.lower(), family_dict, report_dir, log_dir, pcap_dir)
+        family = family.lower().replace(" ","")
+        if family in family_dict:
+            d.download_samples_for_directory(option['-d'][1],
+            family, family_dict, report_dir, log_dir, pcap_dir)
+
+
+print(option['-m'][1])

@@ -18,14 +18,13 @@ def help():
     print("\t-d\tSpecifies directory with malware samples.")
     print("\t-f\tSpecifies one malware sample.")
     print('\t-o\tSpecifies output directory name for dowloaded pcaps')
-    print("\t--now\tImmediately after submit downloads pcap files.")
-    print(bcolors.OKBLUE+"\n  --download"+bcolors.ENDC+"\tDownload all files from specified report folder")
+    print(bcolors.OKBLUE+"\n  --download"+bcolors.ENDC+"\tDownload all pcaps for specified csv file")
     print(bcolors.OKCYAN+"  Options for download:"+bcolors.ENDC)
-    print("\t-d\tSpecifies one folder with report files. Folder mustn't contain other folders.")
+    print("\t-f\tSpecifies one csv file created by --submit command or --all command.")
     print('\t-o\tSpecifies output directory name for dowloaded pcaps')
     print(bcolors.OKBLUE+"\n  --get"+bcolors.ENDC+"\tDownloads n malware samples of specified family")
     print(bcolors.OKCYAN+"  Options for get:"+bcolors.ENDC)
-    print("\t-m\tSpecifies malware family.")
+    print("\t-m\tSpecifies malware family. If the family consist of 2 words, it needs to be in \"\"(\"Smoke Loader\") ")
     print("\t-l\tSpecifies how many samples of given family we want.")
     print('\t-d\tSpecifies output directory name for dowloaded samples')
     print(bcolors.OKBLUE+"\n  --all"+bcolors.ENDC+"\tDownloads n malware samples of specified family and runs analysis and than stores the pcap files")
@@ -34,8 +33,7 @@ def help():
     print("\t-l\tSpecifies how many samples of given family we want.")
     print('\t-o\tSpecifies output directory name for dowloaded pcaps')
     print("\t-d\tSpecifies output directory for malware samples.")
-    print("\t--now\tImmediately after submit downloads pcap files.")
-    print("\nLog files are automaticaly created. The file name is based on the input directory")
+    print("\nLog and report files are automaticaly created. The file name is based on the input directory")
 
 
 # check if directory end with '/'

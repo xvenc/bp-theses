@@ -32,14 +32,14 @@ Commands:
         -f	Specifies one malware sample. (Can't combine with -d)
         -o	Specifies output directory name for dowloaded pcaps
 
-    --download	    Download all files from specified csv file 
+    --download	    Download all pcaps for specified csv file 
     Options for download:
         -f	Specifies one .csv file.
         -o	Specifies output directory name for dowloaded pcaps
 
     --get	Downloads n malware samples of specified family
     Options for get:
-        -m	Specifies malware family.
+        -m	Specifies malware family. If the family is 2 words, than it needs to be in "" ("Smoke Loader")
         -l	Specifies how many samples of given family we want.
         -d	Specifies output directory name for dowloaded samples
 
@@ -50,7 +50,7 @@ Commands:
         -o	Specifies output directory name for dowloaded pcaps
         -d	Specifies output directory for malware samples.
 
-Report files are automaticaly created. The file name is based on the input directory.
+Report and log files are automaticaly created. The file name is based on the input directory.
 COMMAND arguments can't be combined.
 
 ```
@@ -101,17 +101,17 @@ Download malware samples for family redlinestealer
 $ ls 
 example_family.txt  README.md  requirements.txt  src/  triage_client.py
 
-$ python3 triage_client.py --get -m RedLineStealer -d malware/ -l 2
+$ python3 triage_client.py --get -m "Smoke Loader" -d malware/ -l 2
 
 Queried 2 samples for family redlinestealer. Now the samples will be downloaded.
 Downloaded malware sample: malware4.zip
 Downloaded malware sample: malware5.zip
 
 $ ls
-example_family.txt  malware/  README.md  requirements.txt  src/  triage_client.py
+example_family.txt logs/  malware/  README.md  requirements.txt  src/  triage_client.py
 ```
 ```
-Submit directory for analysis but dont download the samples
+Submit directory for analysis 
 $ ls 
 example_family.txt malware/  README.md  requirements.txt  src/  triage_client.py
 
