@@ -9,17 +9,21 @@ First you need to unzip the `dataset_creator.zip` file. On Linux, use the comman
 
 Next, using the command `pip install -r requirements.txt` you need to install all the necessary packages. After that, the program can be run using `python3 triage_client.py <arguments>`.
 
+If you have your own account on `tria.ge` and want to use yours just change the variable **auth_api_key** in the file `triage_client.py` on line 13. You can find your authorization api key on this link: 
+`https://tria.ge/account`. Otherwise my account with my api key will be used and you wont see the submitted samples on the `tria.ge` website.
+
 Program was tested on Ubuntu 20.04 and on Arch linux distribution.
 
 ## Usage
-The main command is the `--all` command. This command downloads `n` number of samples for each family, then it will upload all the samples to the `tria.ge` for analysis.
-And the it will download all the pcaps and overview reports as .json file.
+The **main command** is the `--all` command. This command downloads `n` number of samples for each family, then it will upload all the samples to the `tria.ge` for analysis.
+And the it will download all the pcaps and overview reports as .json file. The file with malware families needs to have each family name on new line. And it's better to look the family name on the website `bazaar.abuse.ch` and use the name what they use, because sometimes it doesnt work if the name is a bit different. It the zip archive is exampe with 15 family names.
 
 Next command is `--submit` command. This command is for uploading single file or whole directory to the `tria.ge` for analysis. If whole directory is uploaded then `csv` log files are created. But if only simple file is uploaded no log files are created.
 
 Command `--download` is used for downloading all pcap from `.csv` log file. This command only works if some `.csv` files were created using command `--submit`.
 
-And last command `--get` is used to download `n` number of samples of specified family. 
+And last command `--get` is used to download `n` number of samples of specified family.
+
 
 ```
 Usage: python3 triage_client.py [COMMAND] [OPTIONS]
@@ -40,13 +44,13 @@ Commands:
     --get	Downloads n malware samples of specified family
     Options for get:
         -m	Specifies malware family. If the family is 2 words, than it needs to be in "" ("Smoke Loader")
-        -l	Specifies how many samples of given family we want.
+        -l	Specifies how many samples of given family we want. (Maximum is 1000)
         -d	Specifies output directory name for dowloaded samples
 
     --all	Downloads n malware samples of specified family and runs analysis and than stores the pcap files
     Options for all:
         -m	Specifies malware family. Or .txt file with malware family names each on new line of the file
-        -l	Specifies how many samples of given family we want.
+        -l	Specifies how many samples of given family we want. (Maximum is 1000)
         -o	Specifies output directory name for dowloaded pcaps
         -d	Specifies output directory for malware samples.
 

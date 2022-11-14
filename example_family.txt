@@ -3,3 +3,13 @@ Mirai
 Heodo
 AgentTesla
 Smoke Loader
+Amadey
+SnakeKeylogger
+FormBook
+FickerStealer
+RemcosRAT
+Nymaim
+Loki
+GuLoader
+Tofsee
+RaccoonStealer
