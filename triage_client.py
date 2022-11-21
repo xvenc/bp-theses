@@ -71,7 +71,7 @@ def get_families_from_logs(log_dir):
 # MAIN
 client = triage.Client(auth_api_key, public_api)
 command,option = arg_parse()
-d = Downloader(public_api+"v0/samples", auth_api_key, client)
+d = Downloader(public_api+"v0/samples/", auth_api_key, client)
 sample_down = SampleDownloader()
 uploader = Uploader(report_dir, client, log_dir)
 

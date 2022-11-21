@@ -44,7 +44,7 @@ class Downloader:
         if res:
             print(bcolors.OKGREEN + "Downloaded pcap for " + 
             bcolors.OKBLUE+ "{0}".format(filename) + bcolors.ENDC)
-    
+
     def download_from_csv(self, csv, task_id, outpud_dir):
         for row in csv:
             try:
@@ -62,7 +62,7 @@ class Downloader:
         if res:
             print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE + 
                     "{0}".format(filename) + bcolors.ENDC)
-    
+
     # function to wait for the analysis to be done and then download the pcap
     def _download_wait(self, sample_id, filename, pcap_dir, subdir, report_dir):
         while True:
