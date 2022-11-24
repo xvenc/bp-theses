@@ -61,7 +61,7 @@ class Downloader:
     def download_sample(self, sample_id, task_id, outpud_dir, filename, num):
         res  = self._download_pcap(sample_id, task_id, outpud_dir, filename, num)
         if res:
-            print(bcolors.OKGREEN + "Downloaded pcaps for " + bcolors.OKBLUE + 
+            print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE + 
                     "{0}".format(filename) + bcolors.ENDC)
 
     # function to wait for the analysis to be done and then download the pcap
