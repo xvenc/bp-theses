@@ -15,7 +15,7 @@ If you have your own account on `tria.ge` and want to use yours just change the 
 Program was tested on Ubuntu 20.04 and on Arch linux distribution.
 
 ## Usage
-The **main command** is the `--all` command. This command downloads `n` number of samples for each family, then it will upload all the samples to the `tria.ge` for analysis.
+The **main command** is the `--all` command. This command downloads `n` number of samples for each family, then it will upload all the samples to the `tria.ge` for analysis. And 2 pcap files will be downloaded from 2 analysis for each malware sample. The pcaps for one malware have same name but different endings `_1` and `_2`.
 And the it will download all the pcaps and overview reports as .json file. The file with malware families needs to have each family name on new line. And it's better to look the family name on the website `bazaar.abuse.ch` and use the name what they use, because sometimes it doesnt work if the name is a bit different. It the zip archive is exampe with 15 family names.
 
 Next command is `--submit` command. This command is for uploading single file or whole directory to the `tria.ge` for analysis. If whole directory is uploaded then `csv` log files are created. But if only simple file is uploaded no log files are created.

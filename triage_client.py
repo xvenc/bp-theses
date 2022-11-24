@@ -87,7 +87,8 @@ if command['--submit']:
 elif command['--download']:
     with open(option["-f"][1],mode='r') as csv_file:
         content = csv.DictReader(csv_file)
-        d.download_from_csv(content,'behavioral1', option['-o'][1]) 
+        d.download_from_csv(content,'behavioral1', option['-o'][1], "1")
+        d.download_from_csv(content, 'behavioral2', option['-o'][1], "2") 
 
 # download malware samples
 elif command['--get']:
@@ -125,7 +126,7 @@ elif command['--all']:
         if option['-d'][0] and path.isdir(option["-d"][1]):
             uploader.submit_directory(option, client, family)
 
-    print("Downloading pcap for uploaded samples...")
+    print("Downloading pcaps for uploaded samples...")
     time.sleep(300)
     # after all samples were submitted wait and download samples
     family_dict = get_families_from_logs(log_dir)
@@ -134,6 +135,3 @@ elif command['--all']:
         if family in family_dict:
             d.download_samples_for_directory(option['-d'][1],
             family, family_dict, report_dir, log_dir, pcap_dir)
-
-
-print(option['-m'][1])

@@ -13,7 +13,7 @@ class Downloader:
         self.token = auth_token
         self.client = client
 
-    def _download_pcap(self, sample_id, taksk_id, output_dir, filename):
+    def _download_pcap(self, sample_id, taksk_id, output_dir, filename, num):
         s = Session()
         headers = {'Authorization': 'Bearer {0}'.format(self.token)}
         data = s.get(url= self.url + f"{sample_id}/{taksk_id}/dump.pcap",headers=headers).content
@@ -21,7 +21,7 @@ class Downloader:
             output_dir += '/'
         if not path.isdir(output_dir):
             Path(output_dir).mkdir(parents=True, exist_ok=True)
-        with open("%s/%s.pcap" % (output_dir,path.splitext(filename)[0]), "wb") as wf:
+        with open("%s/%s_%s.pcap" % (output_dir,path.splitext(filename)[0],num), "wb") as wf:
                     wf.write(data)
         return True
 
@@ -37,7 +37,7 @@ class Downloader:
     def download_from_report(self, data, outpud_dir, filename):
         try:
             res = self._download_pcap(data['sample']['id'], "behavioral1",
-                                      outpud_dir, filename)
+                                      outpud_dir, filename, "1")
         except:
             print(bcolors.FAIL + "ERROR: Couldnt download pcap files")
             exit(1)
@@ -45,11 +45,12 @@ class Downloader:
             print(bcolors.OKGREEN + "Downloaded pcap for " + 
             bcolors.OKBLUE+ "{0}".format(filename) + bcolors.ENDC)
 
-    def download_from_csv(self, csv, task_id, outpud_dir):
+    def download_from_csv(self, csv, task_id, outpud_dir, num):
         for row in csv:
             try:
                 res = self._download_pcap(row['Sample_id'], task_id, 
-                                        outpud_dir, row['Filename'])
+                                        outpud_dir, row['Filename'],
+                                        num)
             except:
                 print(bcolors.FAIL + "ERROR: Couldnt download pcap files")
                 exit(1)
@@ -57,10 +58,10 @@ class Downloader:
                 print(bcolors.OKGREEN + "Downloaded pcap for " + 
                 bcolors.OKBLUE+ "{0}".format(row['Filename']) + bcolors.ENDC)
 
-    def download_sample(self, sample_id, task_id, outpud_dir, filename):
-        res  = self._download_pcap(sample_id, task_id, outpud_dir, filename)
+    def download_sample(self, sample_id, task_id, outpud_dir, filename, num):
+        res  = self._download_pcap(sample_id, task_id, outpud_dir, filename, num)
         if res:
-            print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE + 
+            print(bcolors.OKGREEN + "Downloaded pcaps for " + bcolors.OKBLUE + 
                     "{0}".format(filename) + bcolors.ENDC)
 
     # function to wait for the analysis to be done and then download the pcap
@@ -75,7 +76,9 @@ class Downloader:
             # check if analysis finished
             if  status == 'reported':
                 self.download_sample(sample_id, 'behavioral1', pcap_dir+
-                                        subdir, filename)
+                                    subdir, filename, "1")
+                self.download_sample(sample_id, 'behavioral2', pcap_dir+
+                                    subdir, filename, "2")
 
                 report_f = create_file(path.splitext(filename)[0])
                 self._report(sample_id, report_dir+subdir, report_f)
