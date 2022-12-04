@@ -31,20 +31,29 @@ Cca 8 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci 
 Příklady rodin a nějaké statistiky.
 
 
-\chapter{Automatická tvorba datasetů} \label{3.chap}
-Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje.
+\chapter{Automatické vytváření datasetů} \label{3.chap}
+Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje. Popsat co jsou pcapy, co se vyskytuje v reportech, co je to sandbox prostredi. proc zrovna tento sandbox, zminit i jine.
+Jedna se o jednudochou pipeline a je na obrazku, jednotlive vstupy a vystupy casti jsou popsany v nasledujicich podkapitolach.
 
 Podstatnou a velice důležitou částí této práce je výběr a tvorba vhodných datových sad (z anglického \textit{datasets}), jelikož s daty souvisí důveryhodnost dosažených výsledků.
+Proto byl pro vytváření žádoucích datových sad vytvořen nástroj, který bude v následující kapitole představen. Jedná se o plně automatizovanou sadu skriptů, které byly napsány v 
+programovacím jazyce Python. 
 
-
-Obrázek jednoduché pipeline.
+Na obrázku \ref{pipeline} je znázorněno jednoduché schéma, jak tento nástroj pracuje. Program nejprve stáhne odpovídající počet malware vzorků. Tyto vzorky jsou pak poslány na server k analýze.
+Pro každý vzorek se provedou dvě analýzy každá na jiném referenčním stroji.
+Po dokončení analýzy vzorků jsou ke každému vzorku staženy dva pcap soubory se zachycenou kumunikací malwaru a ješte zpráva o daném vzorku. Vše bude detailně popsáno v následujících sekcích, kde 
+budou příklady výstupů a výstupů.
 
 \begin{figure}[h]
 	\centering
         \includegraphics[width=0.8\textwidth]{obrazky/pipeline.png}
-	\caption{Proces tvorby datasetů}
+	\caption{Proces vytváření datasetů}
     \label{pipeline}
 \end{figure}
+
+\section{Stahování malware vzorků}
+\section{Analýza stažených vzorků}
+\section{Výstup programu}
 
 Cca 5 stranek
     
