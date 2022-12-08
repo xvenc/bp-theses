@@ -25,9 +25,9 @@ Tato bakalářská práce se skláda ze 4 kapitol. Toho úvodu, který slouží 
 je představeno několik současných řešení detekce škodlivého softwaru, které jsou založeny na strojovém učení a jejich údajná přesnost.
 V kapitole s číslem \ref{3.chap} je pak přiblížen způsob jakým byly vytvořeny vhodné datové sady a popis vytvořeného nástroje sloužícího k tomuto účelu. V závěru jsou pak zhodnoceny dosavadní výsledky a postup další práce.
 
-\chapter{Malware} \label{2.chap}
+\chapter{Malware a způsoby jeho detekce} \label{2.chap}
 %Prejmenovat tuto kapitolu
-Cca 8 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci se v současné době používají.
+Cca 5 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci se v současné době používají.
 Příklady rodin a nějaké statistiky.
 
 
@@ -73,9 +73,20 @@ jeho něchtěnému spuštění. Vzorky jsou uloženy podle rodin, aby z důvodu 
 
 \section{Analýza stažených vzorků}
 %popsat pcapy, jak probíha analyza, sandboxy
+V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analýza je prováděna v sandbox prostředení, aby nedošlo k žádnému poškození uživatelského počítače.
+Použitým sandbox prostředím pro analýzu je nástroj zvaný \textit{Triage}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. Tento nástroj byl vybrán kvůli jeho škálovatelnosti a rychlosti, 
+ale především kvůli jeho komplexnímu API rozhraní.
+
+Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy (odkaz na kapitolu) ve dvou různých virtuálních prostředích, jak je možné vidět na obrázku . První analýza je prováděno na virtuálním stroji, kde beží 
+systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Windows 10.
+% TODO picture of analysis
+
+
+\newpage
 \section{Výstup programu}
 % konecny vystup programu rolozeni struktury
 
+\newpage
 \section{Využité technologie}
 
 Veškeré skripty jsou napsány v programovacím jazyce \textbf{Python}. Tento jazyk byl zvolen hned z několika důvodů.
