@@ -28,7 +28,7 @@ V kapitole s číslem \ref{3.chap} je pak přiblížen způsob jakým byly vytvo
 \chapter{Malware a způsoby jeho detekce} \label{2.chap}
 %Prejmenovat tuto kapitolu
 Cca 5 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci se v současné době používají.
-Příklady rodin a nějaké statistiky.
+Příklady rodin a nějaké statistiky. Co je statická a dynamická analýza
 
 
 \chapter{Automatické vytváření datových sad} \label{3.chap}
@@ -71,7 +71,7 @@ bezplatná a lze stahovat neomezený počet vzorků na rozdíl od jiných databa
 Názvy rodin malware musí být stejné jako je specifikuje \textit{MalwareBazaar}, aby nedošlo k nějaké záměně s jiným druhem malwaru. Každý vzorek je poté stažen, jako zaheslovaný zip soubor, aby omylem nedošlo k 
 jeho něchtěnému spuštění. Vzorky jsou uloženy podle rodin, aby z důvodu jednoduššího vyhledávání. Jediným omezením je maximalní počet malware vzorků stažených pro jednu rodinu, který činí 1000 vzorků.
 
-\section{Analýza stažených vzorků}
+\section{Analýza vzorků}
 %popsat pcapy, jak probíha analyza, sandboxy
 V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analýza je prováděna v sandbox prostředení, aby nedošlo k žádnému poškození uživatelského počítače.
 Použitým sandbox prostředím pro analýzu je nástroj zvaný \textit{Triage}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. Tento nástroj byl vybrán kvůli jeho škálovatelnosti a rychlosti, 
@@ -87,10 +87,10 @@ systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Wi
     \label{Analysis_diagram}
 \end{figure}
 
-% Popsat pcapy co je v report souborech a k cemu jsou pcapy asi
-
+Každá analýza se sestáva z extrakce malware vzorku, ze zip archivu. A jeho následné spuštění v čistém prostředí. Poté je zaznamenávána veškerá síťová komunikace a také, jaké všechny procesy a programy se spustí.
 \newpage
 \section{Výstup programu}
+% Popsat pcapy co je v report souborech a k cemu jsou pcapy asi
 % konecny vystup programu, rolozeni struktury
 
 \newpage
@@ -116,9 +116,9 @@ pro spracování odpovědi, ověření zda je spojení stále aktivní a nakonec
 
 Mezi další knihovny, které byly v jisté míře malé míře použity jsou:
 \begin{itemize}
-    \item \textbf{csv}\footnote{}
-    \item \textbf{pathlib}\footnote{}
-    \item \textbf{json}\footnote{}
+    \item \textbf{csv}\footnote{\href{https://docs.python.org/3/library/csv.html}{https://docs.python.org/3/library/csv.html}}\\Pro usnadění práce s vytvořenými logovacími soubory
+    \item \textbf{pathlib}\footnote{\href{https://docs.python.org/3/library/pathlib.html}{https://docs.python.org/3/library/pathlib.html}}\\Pro vytváření vnořených adresářů.
+    \item \textbf{json}\footnote{\href{https://docs.python.org/3/library/json.html}{https://docs.python.org/3/library/json.html}}\\Knihovna pro k převodu slovníků na json formát.
 \end{itemize}
 
 
