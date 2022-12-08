@@ -35,7 +35,9 @@ Příklady rodin a nějaké statistiky.
 %Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje. Popsat co jsou pcapy, co se vyskytuje v reportech, co je to sandbox prostredi. proc zrovna tento sandbox, zminit i jine.
 %Jedna se o jednudochou pipeline a je na obrazku, jednotlive vstupy a vystupy casti jsou popsany v nasledujicich podkapitolach.
 
-Podstatnou a velice důležitou částí této práce je výběr a tvorba vhodných datových sad (z anglického \textit{datasets}), jelikož s daty souvisí důveryhodnost dosažených výsledků.
+Podstatnou a velice důležitou částí této práce je výběr a tvorba vhodných datových sad (z anglického \textit{datasets}).
+Protože v této práci je využito stojového učení, je na vytvoření žádoucí datové sady kladen velký důraz. 
+S daty totiž souvisí důveryhodnost dosažených výsledků.
 Proto byl pro tvorbu žádoucích datových sad vytvořen nástroj, který bude v následující kapitole představen. 
 
 Tato kapitola tedy pojednává o postupu vytváření datových sad. Nejprve je tento proces zjednodušeně popsán.
@@ -46,7 +48,36 @@ A nakonec jsou představeny technologie a programovací jazyk, který byl pro to
 %Poté je popsána obecný proces vytváření těchto datových sad. A nakonec jsou zde popsány jednotlivé části tohoto procesu a 
 %jak vypadá skutečný výstup programu.
 
-\section{Technologie}
+\section{Postup vytváření datových sad}
+Zjednodušený proces tvorby datasetů lze vidět na obrázku \ref{pipeline}, kde je znázorněno jednoduché schéma procesu, jak vytvořený nástroj pracuje. 
+
+Nejprve tedy nástroj stáhne odpovídající počet malware vzorků z volně dostupného databázového serveru. Tyto vzorky jsou pak poslány na server, kde je provedena dynamická analýza.
+Pro každý vzorek se provedou dvě analýzy každá na jiném referenčním stroji.
+Po dokončení analýzy vzorků jsou ke každému vzorku staženy dva soubory se zachycenou síťovou kumunikací malwaru v podobě \textit{pcap} souborů a ješte zpráva shrnující analýzu daného vzorku.
+Každá část tohoto procesu bude detailně popsáno v následujících sekcích, kde budou uvedy i příklady výstupů a výstupů dílčích částí.\\
+
+\begin{figure}[h]
+	\centering
+        \includegraphics[width=0.8\textwidth]{obrazky/pipeline.png}
+	\caption{Proces vytváření datasetů}
+    \label{pipeline}
+\end{figure}
+
+\section{Stahování malware vzorků}
+Prvním krokem je stažení dostatečného počtu malware vzorků pro jednotlivé malware rodiny. Jediným vstupem do toho nástroje od uživatele je tedy pouze textový soubor, který obsahuje
+jména rodin. Všechny vzorky jsou stahovány z veřejně dostupné databaze \textit{MalwareBazaar}\footnote{\href{https://bazaar.abuse.ch/}{https://bazaar.abuse.ch/}}. Tato databáze je 
+bezplatná a lze stahovat neomezený počet vzorků na rozdíl od jiných databazí jako například \textit{VirusTotal}\footnote{\href{https://www.virustotal.com/gui/home/upload}{https://www.virustotal.com/}}.
+
+Názvy rodin malware musí být stejné jako je specifikuje \textit{MalwareBazaar}, aby nedošlo k nějaké záměně s jiným druhem malwaru. Každý vzorek je poté stažen, jako zaheslovaný zip soubor, aby omylem nedošlo k 
+jeho něchtěnému spuštění. Vzorky jsou uloženy podle rodin, aby z důvodu jednoduššího vyhledávání. Jediným omezením je maximalní počet malware vzorků stažených pro jednu rodinu, který činí 1000 vzorků.
+
+\section{Analýza stažených vzorků}
+%popsat pcapy, jak probíha analyza, sandboxy
+\section{Výstup programu}
+% konecny vystup programu rolozeni struktury
+
+\section{Využité technologie}
+
 Veškeré skripty jsou napsány v programovacím jazyce \textbf{Python}. Tento jazyk byl zvolen hned z několika důvodů.
 Především ale kvůli jeho jednoduchosti a známosti. Dále taky kvůli knihovnám pro práci s HTTP a posíláním dat po síti.
 Velkou výhodou byla také implemetace oficiálního API (aplikačního webového rozhraní z anglického \textit{Application Programming Interface}) klienta pro webové rozhraní 
@@ -72,28 +103,13 @@ Mezi další knihovny, které byly v jisté míře malé míře použity jsou:
     \item \textbf{json}\footnote{}
 \end{itemize}
 
-\section{Postup vytváření datových sad}
-Na obrázku \ref{pipeline} je znázorněno jednoduché schéma, jak vytvořený nástroj pracuje. Program nejprve stáhne odpovídající počet malware vzorků. Tyto vzorky jsou pak poslány na server k analýze.
-Pro každý vzorek se provedou dvě analýzy každá na jiném referenčním stroji.
-Po dokončení analýzy vzorků jsou ke každému vzorku staženy dva pcap soubory se zachycenou kumunikací malwaru a ješte zpráva o daném vzorku. Vše bude detailně popsáno v následujících sekcích, kde 
-budou příklady výstupů a výstupů.
 
-\begin{figure}[h]
-	\centering
-        \includegraphics[width=0.8\textwidth]{obrazky/pipeline.png}
-	\caption{Proces vytváření datasetů}
-    \label{pipeline}
-\end{figure}
-
-\subsection*{Stahování malware vzorků}
-\subsection*{Analýza stažených vzorků}
-\subsection*{Výstup programu}
 
 %Cca 4 stranek
     
 \chapter{Závěr}
 Max 1 stranka \cite{Pysny}
-
+Popsat co se bude dělat dál jak se bude pokracovat.
 TODO
 
 
