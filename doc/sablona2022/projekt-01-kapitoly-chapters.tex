@@ -77,14 +77,21 @@ V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analý
 Použitým sandbox prostředím pro analýzu je nástroj zvaný \textit{Triage}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. Tento nástroj byl vybrán kvůli jeho škálovatelnosti a rychlosti, 
 ale především kvůli jeho komplexnímu API rozhraní.
 
-Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy (odkaz na kapitolu) ve dvou různých virtuálních prostředích, jak je možné vidět na obrázku . První analýza je prováděno na virtuálním stroji, kde beží 
+Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy (odkaz na kapitolu) ve dvou různých virtuálních prostředích. Jak lze vidět na obrázku \ref{Analysis_diagram} tak probíhájí dvě analýzy. První analýza je prováděno na virtuálním stroji, kde beží 
 systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Windows 10.
-% TODO picture of analysis
 
+\begin{figure}[h]
+	\centering
+        \includegraphics[width=0.6\textwidth]{obrazky/diagram.pdf}
+	\caption{Proces analýzy malware vzorků}
+    \label{Analysis_diagram}
+\end{figure}
+
+% Popsat pcapy co je v report souborech a k cemu jsou pcapy asi
 
 \newpage
 \section{Výstup programu}
-% konecny vystup programu rolozeni struktury
+% konecny vystup programu, rolozeni struktury
 
 \newpage
 \section{Využité technologie}
