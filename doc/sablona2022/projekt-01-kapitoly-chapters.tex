@@ -32,14 +32,48 @@ Příklady rodin a nějaké statistiky.
 
 
 \chapter{Automatické vytváření datových sad} \label{3.chap}
-Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje. Popsat co jsou pcapy, co se vyskytuje v reportech, co je to sandbox prostredi. proc zrovna tento sandbox, zminit i jine.
-Jedna se o jednudochou pipeline a je na obrazku, jednotlive vstupy a vystupy casti jsou popsany v nasledujicich podkapitolach.
+%Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje. Popsat co jsou pcapy, co se vyskytuje v reportech, co je to sandbox prostredi. proc zrovna tento sandbox, zminit i jine.
+%Jedna se o jednudochou pipeline a je na obrazku, jednotlive vstupy a vystupy casti jsou popsany v nasledujicich podkapitolach.
 
 Podstatnou a velice důležitou částí této práce je výběr a tvorba vhodných datových sad (z anglického \textit{datasets}), jelikož s daty souvisí důveryhodnost dosažených výsledků.
-Proto byl pro vytváření žádoucích datových sad vytvořen nástroj, který bude v následující kapitole představen. Jedná se o plně automatizovanou sadu skriptů, které byly napsány v 
-programovacím jazyce Python. 
+Proto byl pro tvorbu žádoucích datových sad vytvořen nástroj, který bude v následující kapitole představen. 
 
-Na obrázku \ref{pipeline} je znázorněno jednoduché schéma, jak tento nástroj pracuje. Program nejprve stáhne odpovídající počet malware vzorků. Tyto vzorky jsou pak poslány na server k analýze.
+Tato kapitola tedy pojednává o postupu vytváření datových sad. Nejprve je tento proces zjednodušeně popsán.
+Poté jsou zde detailně popsány jednotlivé části tohoto procesu popsány a co je jejich vstupem a výstupem.
+A nakonec jsou představeny technologie a programovací jazyk, který byl pro toto vytváření zvolen. 
+
+%Tato kapitola tedy pojednává o vybraném programovacím jazyce a knihovnách používaných pro danou úlohu. 
+%Poté je popsána obecný proces vytváření těchto datových sad. A nakonec jsou zde popsány jednotlivé části tohoto procesu a 
+%jak vypadá skutečný výstup programu.
+
+\section{Technologie}
+Veškeré skripty jsou napsány v programovacím jazyce \textbf{Python}. Tento jazyk byl zvolen hned z několika důvodů.
+Především ale kvůli jeho jednoduchosti a známosti. Dále taky kvůli knihovnám pro práci s HTTP a posíláním dat po síti.
+Velkou výhodou byla také implemetace oficiálního API (aplikačního webového rozhraní z anglického \textit{Application Programming Interface}) klienta pro webové rozhraní 
+\texttt{tria.ge}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. 
+Hlavní využívanou knihovnou je tedy knihovna \textbf{tiage}. Dále se hojně využívá knihovna \textbf{requests} \footnote{\href{https://requests.readthedocs.io/en/latest/}{https://requests.readthedocs.io/en/latest/}}
+pro posílaní HTTP požadavků a zpracování jejich odpovědí.
+
+\subsection*{Triage}
+Triage je knihovna sloužící ke komunikaci s aplikačním webovým rozhraním Hatching Triage. Tato knihovna usnadňuje práci s analýzou malware vzorků.
+Její hlavní použití je tedy odesílaní vzorků k analýze a následné stáhnutí statických výsledků této analýzy a souborů se zachycenou síťovou komunikací v 
+podobě paketů, nebo-li souborů s příponou \textit{.pcap}. Hlavní výhodou této knihovny je jednoduchá komunikace s API rozhraním a možnost extrakce všech důležitých
+informací z analýzy.
+
+\subsection*{Requests}
+Requests je jednoduchá, ale efektivní knihovna pro práci s HTTP/1.1 požadavky a pro spracování odpovědí. Je zde podpora všech typů požadvků, jako jsou
+třeba GET, POST, PUT, DELETE a mnoho dalších. Pro potřeby této práce byly použity pouze požadavky typu GET a POST. Dále byly taky využity možnosti
+pro spracování odpovědi, ověření zda je spojení stále aktivní a nakonec samotné vytažení a uložení dat.\\ 
+
+Mezi další knihovny, které byly v jisté míře malé míře použity jsou:
+\begin{itemize}
+    \item \textbf{csv}\footnote{}
+    \item \textbf{pathlib}\footnote{}
+    \item \textbf{json}\footnote{}
+\end{itemize}
+
+\section{Postup vytváření datových sad}
+Na obrázku \ref{pipeline} je znázorněno jednoduché schéma, jak vytvořený nástroj pracuje. Program nejprve stáhne odpovídající počet malware vzorků. Tyto vzorky jsou pak poslány na server k analýze.
 Pro každý vzorek se provedou dvě analýzy každá na jiném referenčním stroji.
 Po dokončení analýzy vzorků jsou ke každému vzorku staženy dva pcap soubory se zachycenou kumunikací malwaru a ješte zpráva o daném vzorku. Vše bude detailně popsáno v následujících sekcích, kde 
 budou příklady výstupů a výstupů.
@@ -51,11 +85,11 @@ budou příklady výstupů a výstupů.
     \label{pipeline}
 \end{figure}
 
-\section{Stahování malware vzorků}
-\section{Analýza stažených vzorků}
-\section{Výstup programu}
+\subsection*{Stahování malware vzorků}
+\subsection*{Analýza stažených vzorků}
+\subsection*{Výstup programu}
 
-Cca 5 stranek
+%Cca 4 stranek
     
 \chapter{Závěr}
 Max 1 stranka \cite{Pysny}
