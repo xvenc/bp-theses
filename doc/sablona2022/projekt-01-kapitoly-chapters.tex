@@ -30,6 +30,13 @@ V kapitole s číslem \ref{3.chap} je pak přiblížen způsob jakým byly vytvo
 Cca 5 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci se v současné době používají.
 Příklady rodin a nějaké statistiky. Co je statická a dynamická analýza
 
+\section{Malware}
+\newpage
+\section{Zpusoby detekce zalozene na strojovem uceni}
+\newpage
+\newpage
+\section{Analyza malware static x dynamic}
+\newpage
 
 \chapter{Automatické vytváření datových sad} \label{3.chap}
 %Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje. Popsat co jsou pcapy, co se vyskytuje v reportech, co je to sandbox prostredi. proc zrovna tento sandbox, zminit i jine.
@@ -77,7 +84,9 @@ V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analý
 Použitým sandbox prostředím pro analýzu je nástroj zvaný \textit{Triage}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. Tento nástroj byl vybrán kvůli jeho škálovatelnosti a rychlosti, 
 ale především kvůli jeho komplexnímu API rozhraní.
 
-Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy (odkaz na kapitolu) ve dvou různých virtuálních prostředích. Jak lze vidět na obrázku \ref{Analysis_diagram} tak probíhájí dvě analýzy. První analýza je prováděno na virtuálním stroji, kde beží 
+Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy (odkaz na kapitolu) ve dvou různých virtuálních prostředích a jedna statická analýza (ta ovšem není pro tuhle práci tak důležítá, proto se jí dále nebudeme zabývat). 
+
+Celkový proces od nahrání vzorku až po vytoření výsledné zprávy lze vidět na obrázku \ref{Analysis_diagram}. Z něj je patrné, že probíhájí dvě oddělené analýzy. První analýza je prováděno na virtuálním stroji, kde beží 
 systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Windows 10.
 
 \begin{figure}[h]
@@ -87,11 +96,30 @@ systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Wi
     \label{Analysis_diagram}
 \end{figure}
 
-Každá analýza se sestáva z extrakce malware vzorku, ze zip archivu. A jeho následné spuštění v čistém prostředí. Poté je zaznamenávána veškerá síťová komunikace a také, jaké všechny procesy a programy se spustí.
-\newpage
+Poté, co je vzorek odeslán k analýze, tak je nejprve naplánovaná jeho statická analýza. Po skončení této analýzy je vzorek odeslán k dynamické analýze. Každá analýza se sestáva z extrakce malware vzorku, ze zip archivu. A jeho následného spuštění v čistém prostředí. Poté je zaznamenávána veškerá síťová komunikace a také veškerá aktivita, ke které dojde.
+Z obou analýz je pak vygenerována výsledná zpráva.
 \section{Výstup programu}
 % Popsat pcapy co je v report souborech a k cemu jsou pcapy asi
 % konecny vystup programu, rolozeni struktury
+%Jak je možné vidět na obrázku \ref{Analysis_diagram}, tak výstupem, který lze ze sandboxu dostat jsou souhrné výsledky analýzy. Tyto výsledky představují soubor (zpráva, anglicky \textit{report}), který popisuje chování malwaru, 
+Jak je možné vidět na obrázku \ref{Analysis_diagram}, tak výstupem po skončení dynamické analýzy jsou různé soubory (nebo-li zprávy, anglicky \textit{reports}). Pro účel téhle práce jsou však důležité pouze dva druhy těchto souborů.
+
+Prvním souborem, který je pro tuhle práci relevantní, je soubor obsahující výstup dynamické analýzy. Triage sandbox poskytuje výsledek této analýzy v několika různých formátech jako je třeba XML, JSON či PDF (výstup reportu, který je pak převeden do formátu PDF lze vidět na obrázku ...).
+Formát PDF není vhodný z důvodů dalšího zpracování, které bude v následujících fázích potřebné. Nelze z něj jednodušše programově vytáhnout informace. Proto je výsledek analýzy stažen ve formátu JSON.
+
+Mezi významné informace, které lze z toho souboru vyčíst, patří název malware rodiny a krátky popis této rodiny malware. Dále potom ndikátory kompromitace (\texttt{Indicators of Compromise}, zkráceně IoC), 
+jsou to tedy hlavně IP adresy a domény, na které se malware snažil připojit a vést jejich prostřednictvím útok. Dále poté může obsahovat navštívené webové stránky a mnoho dalších informací.
+
+\begin{figure}[h]
+	\centering
+        \includegraphics[width=0.7\textwidth]{obrazky/3-triage-report.png}
+	\caption{Snímek obrazovky s výsledky z dynamické analýzy}
+    \label{Report_image}
+\end{figure}
+
+Druhým typem souboru, který je zásadním pro další zpracování jsou soubory typu \texttt{PCAP}. Pro každý malware vzorek jsou staženy dva PCAP soubory.
+Tyto soubory obsahují zachycenou síťovou komunikaci ve formě paketů. Tyto soubory lze analyzovat pomocí nástroje \textit{Wireshark}\footnote{\href{https://www.wireshark.org/}{https://www.wireshark.org/}}, 
+kde si lze vyfiltrovat komunikaci dle potřeby.
 
 \newpage
 \section{Využité technologie}
@@ -114,11 +142,11 @@ Requests je jednoduchá, ale efektivní knihovna pro práci s HTTP/1.1 požadavk
 třeba GET, POST, PUT, DELETE a mnoho dalších. Pro potřeby této práce byly použity pouze požadavky typu GET a POST. Dále byly taky využity možnosti
 pro spracování odpovědi, ověření zda je spojení stále aktivní a nakonec samotné vytažení a uložení dat.\\ 
 
-Mezi další knihovny, které byly v jisté míře malé míře použity jsou:
+Mezi další knihovny, které byly v jisté malé míře použity patří:
 \begin{itemize}
-    \item \textbf{csv}\footnote{\href{https://docs.python.org/3/library/csv.html}{https://docs.python.org/3/library/csv.html}}\\Pro usnadění práce s vytvořenými logovacími soubory
-    \item \textbf{pathlib}\footnote{\href{https://docs.python.org/3/library/pathlib.html}{https://docs.python.org/3/library/pathlib.html}}\\Pro vytváření vnořených adresářů.
-    \item \textbf{json}\footnote{\href{https://docs.python.org/3/library/json.html}{https://docs.python.org/3/library/json.html}}\\Knihovna pro k převodu slovníků na json formát.
+    \item Knihovna \textbf{csv}\footnote{\href{https://docs.python.org/3/library/csv.html}{https://docs.python.org/3/library/csv.html}}\\Pro usnadění práce s vytvořenými logovacími soubory.
+    \item Knihovna \textbf{pathlib}\footnote{\href{https://docs.python.org/3/library/pathlib.html}{https://docs.python.org/3/library/pathlib.html}}\\Pro vytváření vnořených adresářových struktur a ověřování existence adresářů.
+    \item Knihovna \textbf{json}\footnote{\href{https://docs.python.org/3/library/json.html}{https://docs.python.org/3/library/json.html}}\\Slouží pro k převodu slovníků na formát JSON a lepší extrakci informací z tohoto formátu.
 \end{itemize}
 
 
