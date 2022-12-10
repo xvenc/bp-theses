@@ -12,7 +12,7 @@ Se stále rostoucí závislostí dnešní společnosti na internetu a počítač
 Ovšem stále častěji jsou tyto technologie zneužívány útočníky, kteří přicházejí stále s novými metodami, jak napadnou počítače uživatelů a narušit tak jejich soukromý a nebo odcizit citlivé informace.
 Proto je nutné, aby prostředky pro boj s těmito útoky byly neustále modernizovány a byly co nejúčinější.
 
-Proto programy pro detekci škodlivého softwaru (z anglického malicious software, dále pak už jen zkráceně malware) založené na strojovém učení, které jsou v současné době využívány, vyžadují vhodnou datovou sadu na které se bude model učit a ověřovat svoji validitu.
+Proto programy pro detekci škodlivého program (z anglického malicious software, dále pak už jen zkráceně malware) založené na strojovém učení, které jsou v současné době využívány, vyžadují vhodnou datovou sadu na které se bude model učit a ověřovat svoji validitu.
 Cílem této práce tedy je vytvoření vhodného nástroje na tvorbu datových sad, které jsou nezbytné pro tyto metody. %detekce založené na strojovém učení.
 A dále je pak porovnání těchto metod a jejich úspěšnosti při detekci škodlivého softwaru.
 
@@ -27,15 +27,62 @@ V kapitole s číslem \ref{3.chap} je pak přiblížen způsob jakým byly vytvo
 
 \chapter{Malware a způsoby jeho detekce} \label{2.chap}
 %Prejmenovat tuto kapitolu
-Cca 5 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci se v současné době používají.
-Příklady rodin a nějaké statistiky. Co je statická a dynamická analýza
+%Cca 5 stranky co to vůbec malware je a jak se deli a jaké způsoby na detekci se v současné době používají.
+%Příklady rodin a nějaké statistiky. Co je statická a dynamická analýza
+
+Tato kapitola se zabývá základy, co je to vůbec malware, jaké jsou jeho typy a jak lze malware dělit. Dále se zaměřuje rozddíly mezi statickou a dynamickou analýzou. A nakonec se kapitola zaměřuje na detekci malware na základě strojového učení, 
+jaké jsou vůbec v dnešních dnech používané metody a především metody využívající rozhodovací stromy, které jsou pro tuhle práci důležité.
 
 \section{Malware}
+Malware (česky škodlivý program) je akronym pro anglický výraz \textit{\textbf{mal}icious soft\textbf{ware}}. Jako malware se označuje jakýkoliv počítačový program nebo binární kód, který provádí jistou 
+špatnou činnost a jeho cílem je infikovat počítač uživatele a způsobit mu škodu různými způsoby. %cite https://www.kaspersky.com/resource-center/preemptive-safety/what-is-malware-and-how-to-protect-against-it
+                                                                                                % cite the book
+Nejpřesnější mi však přijde definice, která říká, že malware je vlsatně kód běžící v počítačovém systému, o jehož přítomnosti nebo chování správci systému vůbec nevědí, protože kdyby o kódu a jeho chování věděli, nedovolili by jeho spuštění.
+Malware totiž ohrožuje důvěrnost, integritu nebo dostupnost systému tím, že využívá již existujících zranitelností systému nebo vytváří zranitelnosti nové.%cite https://dl.acm.org/doi/pdf/10.1145/3329786
+
+Často také dochází k záměně a pojmů mezi virem a malwarem. Rozdíl spočívá v tom, že malware je souhrnný termín pro celou řadu hrozem a malware je slovo nadřazené virům. Počítačový virus je jednoduše jedním z typů malwaru.
+
+\section{Klasifikace malwaru}
+Jak lze na obrázku \ref{classific} vidět, malware lze klasifikovat na základě různých aspektů. Buď je možné jej rozdělovat podle typu, což je nejčastější způsob, se kterým se v dnešní době lze setkat. Nebo je možné 
+jej dělit na základě jeho chování nebo v určité malé míře se lze setkat s klasifikací na základě práv, které malware má v době jeho spuštění. Ovšem s tímhle dělením se zde dále nebudeme zajímat a je zde zmíněno jen pro zajímavost.
+
+\begin{figure}[h]
+	\centering
+        \includegraphics[width=0.7\textwidth]{obrazky/classification.png}
+	\caption{Možnosti klasifikace malwaru na základě různých kritérií}
+    \label{classific}
+\end{figure}
+\newpage
+\subsection*{Klasifikace na základě typu}
+Jedná se o nejběžnější formu klasifikace, kterou lze kdekoliv najít. Takto lze klasifikovat malware do několika různých skupin. Počet těchto skupin se může nepatrně lišit, protože není pevně daný, ale ve své podstatě jde 
+pouze o rozdělení jednoho typu na dva menší podtypy. 
+
+U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do tohoto typu patří. Typy malware jsou tedy následující: %cite kaspersky, the paper, and the book, and wikipedia
+\begin{itemize}
+    \item \textbf{Virus}je program obvykle ukrytý v jiné aplikaci a spustí se, když je aplikace puštěna. Virus se pak může dále šířit, nebo krást citlivá data. Příkladem virů můžou být například \textit{DarkComet, Stuxnet}. 
+    \item \textbf{Trojský kůň} (v angličtině \textit{Trojan horse} nebo pouze \textit{trojan}) je program, který se vydává za 
+    \item \textbf{Spyware}
+    \item \textbf{Worm}
+    \item \textbf{Adware}
+    \item \textbf{Ransomware}
+    \item \textbf{Bots}
+\end{itemize}
+
+
+%https://dl.acm.org/doi/pdf/10.1145/3329786
+%https://www.kaspersky.com/resource-center/threats/malware-classifications
+%https://www.kaspersky.com/resource-center/threats/types-of-malware
+%https://idhwanit.files.wordpress.com/2017/03/windows-virus-and-malware-troubleshooting-1e-2017.pdf
 \newpage
 \section{Zpusoby detekce zalozene na strojovem uceni}
+%https://www.ripublication.com/ijcir21/ijcirv17n1_01.pdf
+%https://media.kaspersky.com/en/enterprise-security/Kaspersky-Lab-Whitepaper-Machine-Learning.pdf
+%file:///home/xvenc/Downloads/preprints202209.0103.v1.pdf
+%https://ieeexplore.ieee.org/abstract/document/8949524
 \newpage
 \newpage
 \section{Analyza malware static x dynamic}
+%https://dl.acm.org/doi/pdf/10.1145/3329786
 \newpage
 
 \chapter{Automatické vytváření datových sad} \label{3.chap}
