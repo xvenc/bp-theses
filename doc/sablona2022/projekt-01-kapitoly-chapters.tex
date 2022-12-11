@@ -108,15 +108,39 @@ Chování je tedy nespočet a zde byly představeny pouze nejznámější a nej�
 %https://media.kaspersky.com/en/enterprise-security/Kaspersky-Lab-Whitepaper-Machine-Learning.pdf
 %file:///home/xvenc/Downloads/preprints202209.0103.v1.pdf
 %https://ieeexplore.ieee.org/abstract/document/8949524
-\section{Analyza malware static x dynamic}
+\section{Analýza malwaru}
 Pro detekci malwaru založeného na strojovém učení a jeho následného dělení je nutné porozumět dvěma základním přístupům k jeho analýze. Analýza malwaru je proces jejiž cílem je určit funkčnost, původ a možný dopad škodlivého vzorku na daný systém.
+
+Tento proces je velice důležitý pro boj s malwarem. Pro vývoj kvalitních detekčních technik a taky pro vývoj nástrojů, které mají malware ze systému odstranit. Analýzu malware lze provádět za různými účely ať už je to za účelem pochopení, jak malware funguje
+nebo pro lepší představu o rozsahu infekce a nebo za účelem zjištění následků útoku.
+
+Pro analýzu malwaru se používají dvě různé metody. \textbf{Statická analýza} malwaru a \textbf{dynamická analýza} malwaru. 
+Jak už lze odvodit z jejího jména tak statická analýza se provádí bez spuštění malwaru. Naproti tomu dynamická analýza se provádí spuštěním malwaru v kontrolovaném prostředí, 
+jako třeba ve virtualním prostředí.
+
+\subsection*{Statická analýza}
+Statická analýza je proces analýzy malwaru, aniž by byl skutečně spuštěn. Bývá tedy bezpečnější než analýza dynamická. Někdy se o statické analýze mluví jako o "čtení" zdrojového nebo binárního kódu za účelem
+odvození chovaní malwaru. Statická analýza je aplikována na zdrojový kód a nebo pokud není zdrojový kód k dispozici (což je častější varianta) tak na binární kód. Ovšem při kompilaci zdrojového kódu na binární se nějaké informace ztratí.
+
+Pro statickou analýzu malwaru se používají různé techniky. Některé z nich jsou popsány níže.
+\begin{itemize}
+    \item \textbf{Otisky souborů} (\textit{file fingerprint}) je jeden ze způsobů statické analýzy, který spočívá ve vypočítání kryptografického hashe (např. md5) binárního souboru za účelem jeho odlišení od jiných souborů.
+    \item \textbf{Anti-virové skenování} (\textit{AV scanning}) je velice účínný způsob pokud je malware dobře známý, tak je vysoce pravděpodobné, že bude jedním z AV skenerů detekován. Ovšem jejich použití je časově náročné, ale někdy se stává nutností.
+    \item \textbf{Rozebraní} spíše známé pod pojmem (\textit{disassembly}) je zřejmě nejběžnější a nejspolehlivější metoda staické analýzy. Tato metoda představuje rozebrání binárního souboru pomocí speciálního nástroje, který jej převede do strojového kódu programovacího jazyka assembler. Na jehož základě lze zkontrolovat logiku programu a prozkoumat tak jeho záměr. 
+\end{itemize}
+
+Dále se lze setkat například s metodami založenými na extrakcí řetězců nebo na Kontrola formátu souboru.
+
+Výhodou statuické analýzy je, že umožnuje vysoce komplexní analýzu, jak zdrojového kódu tak binárního souboru. Navíc je bezpečnejší než dynamická analýza a nehrozí tedy nechtěná infekce uživatelského počítače.
+Ovšem hlavní nevýhodou statické analýzy je její časová náročnost, těžkopádnost a proto jsou pro ni vyžadovány odborné znalosti.
+\newpage
+\subsection*{Dynamická analýza}
 %https://www.researchgate.net/publication/276967529_Implementation_of_Malware_Analysis_using_Static_and_Dynamic_Analysis_Method
 %http://www.differencebetween.net/technology/difference-between-static-malware-analysis-and-dynamic-malware-analysis/
 %https://hackercombat.com/static-malware-analysis-vs-dynamic-malware-analysis/
 %https://web.archive.org/web/20160418151823/http://www.ijarcsse.com/docs/papers/Volume_3/4_April2013/V3I4-0371.pdf
 %https://www.crowdstrike.com/cybersecurity-101/malware/malware-analysis/
 %https://dl.acm.org/doi/pdf/10.1145/3329786
-\newpage
 
 \chapter{Automatické vytváření datových sad} \label{3.chap}
 %Proč jsou datasety důležité, popsat můj nástroj na tvorbu datasetů. Co je jeho výstupem a jak funguje. Popsat co jsou pcapy, co se vyskytuje v reportech, co je to sandbox prostredi. proc zrovna tento sandbox, zminit i jine.
