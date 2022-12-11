@@ -65,23 +65,56 @@ U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do
     \item \textbf{Červ}, ale spíše známý pod svým anglickým jménem tedy \textit{worm}, je spolu s virem nejběžnějším typem malwaru. Je viru velice podobný, ale narozdíl od viru se šíří prostředníctvím počítačové sítě. Jedná se o program, který se neustále replikuje a dále šíří a zatížit tak síť a tím zamezit jejímu používání. Jedním ze známých červů je například \textit{SQL Slammer}. 
     \item \textbf{Adware} je zkratka pro anglické spojení \textit{advertising-supported software}. Jedná se zřejmě o nejméně nebezpečný typ malwaru. Tenty typ slouží k zobrazování reklam v prohlížeči nebo mimo něj nejčastěji ve formě vyskakovacích oken. Příkladem adwaru může být \textit{Fireball}.
     \item \textbf{Ransomware} je škodlivý program, který zašifruje nebo zablokuje uživateli data a poté jej žádá o výkupné (v poslední době se vyžaduje zaplacení výkupného v kryptoměně). Tento malware obvykle nebrání v používání počítače, ale pouze uživateli znemožní přístup ke svým datům. Mezi neznámější a nejúčinější ransomwary patří \textit{Loky} a \textit{CryptoLocker}.
-    \item \textbf{Bot} je malware, který provádí akce bez souhlasu uživatele a vetšinou bývá součástí vetší skupiny takzvané \textit{botnet}. Počítač infikovaný botem, může utočník ovládat na dálku. Tento typ malwaru se může šiřit nepozorovaně mezi několika zařízeními. Všichni boti získáváji instrukce z jednoho pro ně hlavního serveru. Jakmile je skupina dostatečně veliká tak se využíva k útokům typu DDoS, které slouží k přetížení nějakého serveru, který poté není schopen po nějakou dobu provozu. V dnešní době je nejznámnějším botem malware \textit{Mirai}.
+    \item \textbf{Bot} \label{botnets} je malware, který provádí akce bez souhlasu uživatele a vetšinou bývá součástí vetší skupiny takzvané \textit{botnet}. Počítač infikovaný botem, může utočník ovládat na dálku. Tento typ malwaru se může šiřit nepozorovaně mezi několika zařízeními. Všichni boti získáváji instrukce z jednoho pro ně hlavního serveru. Jakmile je skupina dostatečně veliká tak se využíva k útokům typu DDoS, které slouží k přetížení nějakého serveru, který poté není schopen po nějakou dobu provozu. V dnešní době je nejznámnějším botem malware \textit{Mirai}.
 \end{itemize}
 
-\subsection*{Klasifikace na základě chování}
+Důležitým pojmem je také rodina malwaru (\textit{malware family}). Malware rodina je skupina programů, které maji stejný nebo podobný technikami útoku. Jedná se tedy o programy jejichž kód má podobné vlastnosti a lze tedy tyto malwary zařadit do stejné skupiny nebo-li rodiny. 
+%https://vision.fireeye.com/editions/06/06-m-trends-fireeye-mandiant.html
 %https://dl.acm.org/doi/pdf/10.1145/3329786
 %https://www.kaspersky.com/resource-center/threats/malware-classifications
 %https://www.kaspersky.com/resource-center/threats/types-of-malware
 %https://idhwanit.files.wordpress.com/2017/03/windows-virus-and-malware-troubleshooting-1e-2017.pdf
+
+\subsection*{Klasifikace na základě chování}
+V předcházející sekci byly ukázány a krátce popsány základní typy malwaru. Tyto názvy jsou často používány v medíích a lidmi a často se nesprávně zaměňují jeden za druhý.
+Malware, ale není vždy vhodné dělit podle typu, ale je lepší jej rozdělit podle jeho chování. Například, jestli jeho účelem je krást informace od uživatele nebo jeho úkolem je se 
+co nejvíce rozšířit a nebo pouze otravovat uživatele tím, že mu bude ukazovat nespočet reklam. Malwary se v dnešní době nevyznačují jedním chováním, ale můžou jich mít více najednou, jak 
+je patrné z obrázku \ref{behavior}. Malware se může například dále šířit a přitom například krást citlivé informace nebo otevřít zadní vrátka pro další útoky. 
+
+\begin{figure}[h]
+	\centering
+        \includegraphics[width=0.8\textwidth]{obrazky/behavior.png}
+	\caption{Jednotlivé typy malwaru a jejich chování, které nemusí vždy vzájemně vylučovat}
+    \label{behavior}
+\end{figure}
 \newpage
-\section{Zpusoby detekce zalozene na strojovem uceni}
+
+Mezi nejběžnější typy chování patří:
+\begin{itemize}
+    \item \textbf{Šíření} - S tímto chováním se setkámae nejčastěji u malwaru typu virus nebo červ. Jejich hlavním cílem je se, co nejvíce rozšířit a tím případně zahltit službu uživatele. Malware se může šířit mnoha způsoby například přes internetovou síť nebo stažením z kompromitovaných webových stránek a tak dále.
+    \item \textbf{Kráděž informací} - Jedná se nejspíš o nejčastější činnost malwaru. Jedná se o čínnost, kdy malware připravuje oběti o citlivé informace, jako jsou čísla účtů, hesla, přístupové údaje za cílem zpeněžit ukradená data přímým použitím nebo jejich nelegální distribucí. Existuje několik způsobů, jak tyto informace krást, například zaznamenávání kláves (anglicky \textit{keylogger}), který zaznamenává všechny zmáčnuté klávesy.
+    \item \textbf{Odepření služby} - K odepření služby může dojít několika způsoby. Jedná se například o zahlcení nějaké služby nebo serveru velkým množstvím falešných požadavků (k tomuto účelu se používájí \textit{botnets} \ref{botnets}). Nebo tohoto lze docílim pomocí \textit{červů}, kterří se šíří skrz počítačovou síť a tím ji můžou zahltit.
+    \item \textbf{Vytváření zranitelnosti} - Hlavním typem malwaru, který vytváří další zranitelnosti jsou Trojští koně. Ti po infiltraci systému vytváří nové zranitelnosti odstraněním antivirových programů, instalací zadních vrátek, změnou nastavení brány firewall.
+\end{itemize}
+
+Mezi další chování, které lze u malwaru pozorovat patří \textbf{krádež zdrojů počítaře} například na těžbu kryptoměn. Dále třeba \textbf{podvádění uživatele} k získání přístupu k soukromým datům, toto chování je běžné pro malware útočíčí na banky za cílem získat přístup k bankovním účtům a získat peníze.
+
+Chování je tedy nespočet a zde byly představeny pouze nejznámější a nejčastěji se vyskytující chování. Malwary patřící do stejného typu se můžou prokazovat různým chováním a nemusí mít pouze jedno chování, ale kombinace těchto chování.
+\newpage
+%https://www.trendmicro.com/vinfo/us/security/definition/Data-Stealing-Malware
+%https://www.snaptechit.com/article/the-top-4-ways-malware-is-spread-2/
+%\section{Zpusoby detekce zalozene na strojovem uceni}
 %https://www.ripublication.com/ijcir21/ijcirv17n1_01.pdf
 %https://media.kaspersky.com/en/enterprise-security/Kaspersky-Lab-Whitepaper-Machine-Learning.pdf
 %file:///home/xvenc/Downloads/preprints202209.0103.v1.pdf
 %https://ieeexplore.ieee.org/abstract/document/8949524
-\newpage
-\newpage
 \section{Analyza malware static x dynamic}
+Pro detekci malwaru založeného na strojovém učení a jeho následného dělení je nutné porozumět dvěma základním přístupům k jeho analýze. Analýza malwaru je proces jejiž cílem je určit funkčnost, původ a možný dopad škodlivého vzorku na daný systém.
+%https://www.researchgate.net/publication/276967529_Implementation_of_Malware_Analysis_using_Static_and_Dynamic_Analysis_Method
+%http://www.differencebetween.net/technology/difference-between-static-malware-analysis-and-dynamic-malware-analysis/
+%https://hackercombat.com/static-malware-analysis-vs-dynamic-malware-analysis/
+%https://web.archive.org/web/20160418151823/http://www.ijarcsse.com/docs/papers/Volume_3/4_April2013/V3I4-0371.pdf
+%https://www.crowdstrike.com/cybersecurity-101/malware/malware-analysis/
 %https://dl.acm.org/doi/pdf/10.1145/3329786
 \newpage
 
