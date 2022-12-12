@@ -45,12 +45,12 @@ Malware totiž ohrožuje důvěrnost, integritu nebo dostupnost systému tím, �
 
 \section{Klasifikace malwaru}
 Jak lze na obrázku \ref{classific} vidět, malware lze klasifikovat na základě různých aspektů. Buď je možné jej rozdělovat podle typu, což je nejčastější způsob, se kterým se v dnešní době lze setkat. Nebo je možné 
-jej dělit na základě jeho chování nebo v určité malé míře se lze setkat s klasifikací na základě práv, které malware má v době jeho spuštění. Ovšem s tímhle dělením se zde dále nebudeme zajímat a je zde zmíněno jen pro zajímavost.
+jej dělit na základě jeho chování nebo v určité malé míře se lze setkat s klasifikací na základě práv, které malware má v době jeho spuštění \cite{article_malware}. Ovšem s tímhle dělením se zde dále nebudeme zajímat a je zde zmíněno jen pro zajímavost.
 
 \begin{figure}[h]
 	\centering
         \includegraphics[width=0.7\textwidth]{obrazky/classification.png}
-	\caption{Možnosti klasifikace malwaru na základě různých kritérií}
+	\caption{Možnosti klasifikace malwaru na základě různých kritérií. Převzat z \cite{article_malware}}
     \label{classific}
 \end{figure}
 \newpage
@@ -58,7 +58,7 @@ jej dělit na základě jeho chování nebo v určité malé míře se lze setka
 Jedná se o nejběžnější formu klasifikace, kterou lze kdekoliv najít. Takto lze klasifikovat malware do několika různých skupin. Počet těchto skupin se může nepatrně lišit, protože není pevně daný, ale ve své podstatě jde 
 pouze o rozdělení jednoho typu na dva menší podtypy. 
 
-U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do tohoto typu patří. Typy malware jsou tedy následující: %cite kaspersky, the paper, and the book, and wikipedia
+U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do tohoto typu patří. Typy malware jsou tedy následující:\cite{kaspersky,article_malware,malware_book,malware_wiki} %cite kaspersky, the paper, and the book, and wikipedia
 \begin{itemize}
     \item \textbf{Virus}je program obvykle ukrytý v jiné aplikaci a spustí se, když je aplikace puštěna. Virus se pak může dále šířit pomocí nějakého média, nebo také krást citlivá data. Příkladem virů můžou být například \textit{DarkComet, Stuxnet}. 
     \item \textbf{Trojský kůň} (v angličtině \textit{Trojan horse} nebo pouze \textit{trojan}) je program, který se vydává za normalní program a tím přinutil uživatele k jeho spuštění. Trojský kůň poté lze využít ze vzdáleného počítače nebo serveru jako přístup k uživatelskému počítači a napáchat tak další škody. Příkladem trojského koně je třeba \textit{TrickBot}.  
@@ -70,7 +70,7 @@ U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do
     \item \textbf{Bot} \label{botnets} je malware, který provádí akce bez souhlasu uživatele a vetšinou bývá součástí vetší skupiny takzvané \textit{botnet}. Počítač infikovaný botem, může utočník ovládat na dálku. Tento typ malwaru se může šiřit nepozorovaně mezi několika zařízeními. Všichni boti získáváji instrukce z jednoho pro ně hlavního serveru. Jakmile je skupina dostatečně veliká tak se využíva k útokům typu DDoS, které slouží k přetížení nějakého serveru, který poté není schopen po nějakou dobu provozu. V dnešní době je nejznámnějším botem malware \textit{Mirai}.
 \end{itemize}
 
-Důležitým pojmem je také rodina malwaru (\textit{malware family}). Malware rodina je skupina programů, které maji stejný nebo podobný technikami útoku. Jedná se tedy o programy jejichž kód má podobné vlastnosti a lze tedy tyto malwary zařadit do stejné skupiny nebo-li rodiny. 
+Důležitým pojmem je také rodina malwaru (\textit{malware family}). Malware rodina je skupina programů, které maji stejný nebo podobný technikami útoku. Jedná se tedy o programy jejichž kód má podobné vlastnosti a lze tedy tyto malwary zařadit do stejné skupiny nebo-li rodiny \cite{malware_fam}. 
 %https://vision.fireeye.com/editions/06/06-m-trends-fireeye-mandiant.html
 %https://dl.acm.org/doi/pdf/10.1145/3329786
 %https://www.kaspersky.com/resource-center/threats/malware-classifications
@@ -86,12 +86,12 @@ je patrné z obrázku \ref{behavior}. Malware se může například dále šíř
 \begin{figure}[h]
 	\centering
         \includegraphics[width=0.7\textwidth]{obrazky/behavior.png}
-	\caption{Jednotlivé typy malwaru a jejich chování, které nemusí vždy vzájemně vylučovat}
+	\caption{Jednotlivé typy malwaru a jejich chování, které nemusí vždy vzájemně vylučovat. Převzat z \cite{article_malware}}
     \label{behavior}
 \end{figure}
 \newpage
 
-Mezi nejběžnější typy chování patří:
+Mezi nejběžnější typy chování patří: \cite{article_malware}
 \begin{itemize}
     \item \textbf{Šíření} - S tímto chováním se setkámae nejčastěji u malwaru typu virus nebo červ. Jejich hlavním cílem je se, co nejvíce rozšířit a tím případně zahltit službu uživatele. Malware se může šířit mnoha způsoby například přes internetovou síť nebo stažením z kompromitovaných webových stránek a tak dále.
     \item \textbf{Kráděž informací} - Jedná se nejspíš o nejčastější činnost malwaru. Jedná se o čínnost, kdy malware připravuje oběti o citlivé informace, jako jsou čísla účtů, hesla, přístupové údaje za cílem zpeněžit ukradená data přímým použitím nebo jejich nelegální distribucí. Existuje několik způsobů, jak tyto informace krást, například zaznamenávání kláves (anglicky \textit{keylogger}), který zaznamenává všechny zmáčnuté klávesy.
@@ -99,7 +99,7 @@ Mezi nejběžnější typy chování patří:
     \item \textbf{Vytváření zranitelnosti} - Hlavním typem malwaru, který vytváří další zranitelnosti jsou Trojští koně. Ti po infiltraci systému vytváří nové zranitelnosti odstraněním antivirových programů, instalací zadních vrátek, změnou nastavení brány firewall.
 \end{itemize}
 
-Mezi další chování, které lze u malwaru pozorovat patří \textbf{krádež zdrojů počítaře} například na těžbu kryptoměn. Dále třeba \textbf{podvádění uživatele} k získání přístupu k soukromým datům, toto chování je běžné pro malware útočíčí na banky za cílem získat přístup k bankovním účtům a získat peníze.
+Mezi další chování, které lze u malwaru pozorovat patří \textbf{krádež zdrojů počítaře} například na těžbu kryptoměn. Dále třeba \textbf{podvádění uživatele} k získání přístupu k soukromým datům, toto chování je běžné pro malware útočíčí na banky za cílem získat přístup k bankovním účtům a získat peníze \cite{article_malware}.
 
 Chování je tedy nespočet a zde byly představeny pouze nejznámější a nejčastěji se vyskytující chování. Malwary patřící do stejného typu se můžou prokazovat různým chováním a nemusí mít pouze jedno chování, ale kombinace těchto chování.
 %https://www.trendmicro.com/vinfo/us/security/definition/Data-Stealing-Malware
@@ -136,7 +136,7 @@ Výhodou statuické analýzy je, že umožnuje vysoce komplexní analýzu, jak z
 Ovšem hlavní nevýhodou statické analýzy je její časová náročnost, těžkopádnost a proto jsou pro ni vyžadovány odborné znalosti.
 
 \newpage
-\subsection*{Dynamická analýza}
+\subsection*{Dynamická analýza} \label{dynamic}
 Spuštění malware vzorku v kontrolovaném prostředí za účelem sledování a analýzy jeho škodlivého chování se nazývá dynamická analýza.
 Narozdíl tedy od statické analýzy je zde chování, vlastonsti a záměry malwaru sledováno během jeho spuštění.
 Díky tomu lze snadno zjistit skutečné chování programu. Další významnou výhodou je, že lze automatizovat, což umožňuje analýzu ve velkém měřítku a taky značně rychlejší než analýza statická.
@@ -209,7 +209,7 @@ V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analý
 Použitým sandbox prostředím pro analýzu je nástroj zvaný \textit{Triage}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. Tento nástroj byl vybrán kvůli jeho škálovatelnosti a rychlosti, 
 ale především kvůli jeho komplexnímu API rozhraní.
 
-Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy (odkaz na kapitolu) ve dvou různých virtuálních prostředích a jedna statická analýza (ta ovšem není pro tuhle práci tak důležítá, proto se jí dále nebudeme zabývat). 
+Pro každý vzorek jsou provedeny dvě automatické dynamické analýzy \ref{dynamic} ve dvou různých virtuálních prostředích a jedna statická analýza (ta ovšem není pro tuhle práci tak důležítá, proto se jí dále nebudeme zabývat). 
 
 Celkový proces od nahrání vzorku až po vytoření výsledné zprávy lze vidět na obrázku \ref{Analysis_diagram}. Z něj je patrné, že probíhájí dvě oddělené analýzy. První analýza je prováděno na virtuálním stroji, kde beží 
 systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Windows 10.
@@ -238,7 +238,7 @@ jsou to tedy hlavně IP adresy a domény, na které se malware snažil připojit
 \begin{figure}[h]
 	\centering
         \includegraphics[width=0.7\textwidth]{obrazky/3-triage-report.png}
-	\caption{Snímek obrazovky s výsledky z dynamické analýzy}
+	\caption{Snímek obrazovky s výsledky z dynamické analýzy. Převzazo z \cite{hatching}}
     \label{Report_image}
 \end{figure}
 
