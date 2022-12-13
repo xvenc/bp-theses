@@ -9,20 +9,20 @@
 \chapter{Úvod}
 
 Se stále rostoucí závislostí dnešní společnosti na internetu a počítačích se z těchto technologií stala neodmyslitelná součást našich životů. 
-Ovšem stále častěji jsou tyto technologie zneužívány útočníky, kteří přicházejí stále s novými metodami, jak napadnou počítače uživatelů a narušit tak jejich soukromý a nebo odcizit citlivé informace.
+Ovšem stále častěji jsou tyto technologie zneužívány útočníky, kteří přicházejí stále s novými metodami, jak napadnou počítače uživatelů a narušit tak jejich soukromý a odcizit citlivé informace.
 Proto je nutné, aby prostředky pro boj s těmito útoky byly neustále modernizovány a byly co nejúčinější.
 
-Proto programy pro detekci škodlivého program (z anglického malicious software, dále pak už jen zkráceně malware) založené na strojovém učení, které jsou v současné době využívány, vyžadují vhodnou datovou sadu na které se bude model učit a ověřovat svoji validitu.
-Cílem této práce tedy je vytvoření vhodného nástroje na tvorbu datových sad, které jsou nezbytné pro tyto metody. %detekce založené na strojovém učení.
-A dále je pak porovnání těchto metod a jejich úspěšnosti při detekci škodlivého softwaru.
-
-Hlavním důvodem, proč se zabývat rozpoznáváním jednotlivých druhů malwaru a jejich klasifikací, je jeho nezbytnost a důležitost.
+Hlavním důvodem, proč se zabývat rozpoznáváním jednotlivých druhů malwaru a jejich klasifikací, je nezbytnost a důležitost toto procesu.
 Jelikož je velice nereálné, že by v následujícíh letech vymizela potřeba se před těmito útoky branít. Ba naopak lze předpokládat, že 
 bude příbývat stále více nových druhů škodlivého softwaru, a proto je nutné na tyto změny rychle a efektivně reagovat, aby byla zajištěna
 bezpečnost uživatelů internetových sítí.
 
-Tato bakalářská práce se skláda ze 4 kapitol. Toho úvodu, který slouží jako nahlédnutí do problematiky, následují dvě samostatné kapitoly a závěru. V kapitola \ref{2.chap} se nejprve seznámíte s dělení škodlivého softwaru do rodin. Následně
-je představeno několik současných řešení detekce škodlivého softwaru, které jsou založeny na strojovém učení a jejich údajná přesnost.
+Proto se čím dál ve větší míře využívají programy pro detekci škodlivého program (z anglického malicious software, dále pak už jen zkráceně malware) založené na strojovém učení. Tyto programy však vyžadují vhodnou datovou sadu, na které se bude model učit a ověřovat svoji validitu.
+Cílem této práce tedy je vytvoření vhodného nástroje na tvorbu datových sad, které jsou nezbytné pro tyto metody detekce založené na strojovém učení.
+A nakonec pak porovnat dosažených výsledků těmito metodami a jejich úspěšnosti při detekci škodlivého softwaru.
+
+Tato bakalářská práce se skláda ze 4 kapitol. Toho úvodu, který slouží jako nahlédnutí do problematiky, následují dvě samostatné kapitoly a závěr. V kapitola \ref{2.chap} se nejprve seznámíte, jak a na základě čeho lze škodlivý software dělit.
+Poté jsou představeny dvě základní metody analýzy škodlivého softwaru.
 V kapitole s číslem \ref{3.chap} je pak přiblížen způsob jakým byly vytvořeny vhodné datové sady a popis vytvořeného nástroje sloužícího k tomuto účelu. V závěru jsou pak zhodnoceny dosavadní výsledky a postup další práce.
 
 \chapter{Malware a způsoby jeho detekce} \label{2.chap}
@@ -31,7 +31,7 @@ V kapitole s číslem \ref{3.chap} je pak přiblížen způsob jakým byly vytvo
 %Příklady rodin a nějaké statistiky. Co je statická a dynamická analýza
 
 Tato kapitola se zabývá základy, co je to vůbec malware, jaké jsou jeho typy a jak lze malware dělit. Jak a na základě jakých kritérií lze malware klasifikovat.
-Nakonec se zaměřuje na to, jak lze malware analyzovat a na rozddíly mezi statickou a dynamickou analýzou. 
+A nakonec se zaměřuje na to, jak lze malware analyzovat a na rozddíly mezi statickou a dynamickou analýzou. 
 
 
 \section{Malware}
@@ -41,7 +41,7 @@ Malware (česky škodlivý program) je akronym pro anglický výraz \textit{\tex
 Nejpřesnější mi však přijde definice, která říká, že malware je vlsatně kód běžící v počítačovém systému, o jehož přítomnosti nebo chování správci systému vůbec nevědí, protože kdyby o kódu a jeho chování věděli, nedovolili by jeho spuštění.
 Malware totiž ohrožuje důvěrnost, integritu nebo dostupnost systému tím, že využívá již existujících zranitelností systému nebo vytváří zranitelnosti nové \cite{article_malware}.%cite https://dl.acm.org/doi/pdf/10.1145/3329786
 
-Často také dochází k záměně a pojmů mezi virem a malwarem. Rozdíl spočívá v tom, že malware je souhrnný termín pro celou řadu hrozem a malware je slovo nadřazené virům. Počítačový virus je jednoduše jedním z typů malwaru.
+Často také dochází k záměně mezi pojmy virus a malwar. Rozdíl spočívá v tom, že malware je souhrnný termín pro celou řadu hrozeb. Počítačový virus je jednoduše jedním z typů malwaru. Lze tedy říci, že malware je slovo nadřazené slovu virus.
 
 \section{Klasifikace malwaru}
 Jak lze na obrázku \ref{classific} vidět, malware lze klasifikovat na základě různých aspektů. Buď je možné jej rozdělovat podle typu, což je nejčastější způsob, se kterým se v dnešní době lze setkat. Nebo je možné 
@@ -58,7 +58,7 @@ jej dělit na základě jeho chování nebo v určité malé míře se lze setka
 Jedná se o nejběžnější formu klasifikace, kterou lze kdekoliv najít. Takto lze klasifikovat malware do několika různých skupin. Počet těchto skupin se může nepatrně lišit, protože není pevně daný, ale ve své podstatě jde 
 pouze o rozdělení jednoho typu na dva menší podtypy. 
 
-U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do tohoto typu patří. Typy malware jsou tedy následující:\cite{kaspersky,article_malware,malware_book,malware_wiki} %cite kaspersky, the paper, and the book, and wikipedia
+U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do tohoto typu patří. Typy malware jsou tedy následující: \cite{kaspersky,article_malware,malware_book,malware_wiki} %cite kaspersky, the paper, and the book, and wikipedia
 \begin{itemize}
     \item \textbf{Virus}je program obvykle ukrytý v jiné aplikaci a spustí se, když je aplikace puštěna. Virus se pak může dále šířit pomocí nějakého média, nebo také krást citlivá data. Příkladem virů můžou být například \textit{DarkComet, Stuxnet} \cite{malware_types}. 
     \item \textbf{Trojský kůň} (v angličtině \textit{Trojan horse} nebo pouze \textit{trojan}) je program, který se vydává za normalní program a tím přinutil uživatele k jeho spuštění. Trojský kůň poté lze využít ze vzdáleného počítače nebo serveru jako přístup k uživatelskému počítači a napáchat tak další škody. Příkladem trojského koně je třeba \textit{TrickBot}.  
@@ -70,7 +70,7 @@ U každého typu je uveden jeho jednoduchý popis a zástupce malwaru, který do
     \item \textbf{Bot} \label{botnets} je malware, který provádí akce bez souhlasu uživatele a vetšinou bývá součástí vetší skupiny takzvané \textit{botnet}. Počítač infikovaný botem, může utočník ovládat na dálku. Tento typ malwaru se může šiřit nepozorovaně mezi několika zařízeními. Všichni boti získáváji instrukce z jednoho pro ně hlavního serveru. Jakmile je skupina dostatečně veliká tak se využíva k útokům typu DDoS, které slouží k přetížení nějakého serveru, který poté není schopen po nějakou dobu provozu. V dnešní době je nejznámnějším botem malware \textit{Mirai}.
 \end{itemize}
 
-Důležitým pojmem je také rodina malwaru (\textit{malware family}). Malware rodina je skupina programů, které maji stejný nebo podobný technikami útoku. Jedná se tedy o programy jejichž kód má podobné vlastnosti a lze tedy tyto malwary zařadit do stejné skupiny nebo-li rodiny \cite{malware_fam}. 
+\label{family}Důležitým pojmem je také rodina malwaru (\textit{malware family}). Malware rodina je skupina programů, které maji stejný nebo podobný technikami útoku. Jedná se tedy o programy jejichž kód má podobné vlastnosti a lze tedy tyto malwary zařadit do stejné skupiny nebo-li rodiny \cite{malware_fam}. 
 %https://vision.fireeye.com/editions/06/06-m-trends-fireeye-mandiant.html
 %https://dl.acm.org/doi/pdf/10.1145/3329786
 %https://www.kaspersky.com/resource-center/threats/malware-classifications
@@ -109,7 +109,7 @@ Chování je tedy nespočet a zde byly představeny pouze nejznámější a nej�
 %https://media.kaspersky.com/en/enterprise-security/Kaspersky-Lab-Whitepaper-Machine-Learning.pdf
 %file:///home/xvenc/Downloads/preprints202209.0103.v1.pdf
 %https://ieeexplore.ieee.org/abstract/document/8949524
-\section{Analýza malwaru}
+\section{Analýza malwaru} \label{analysis}
 Pro detekci malwaru založeného na strojovém učení a jeho následného dělení je nutné porozumět dvěma základním přístupům k jeho analýze. Analýza malwaru je proces jejiž cílem je určit funkčnost, původ a možný dopad škodlivého vzorku na daný systém \cite{analysis_wiki}.
 
 Tento proces je velice důležitý pro boj s malwarem. Pro vývoj kvalitních detekčních technik a taky pro vývoj nástrojů, které mají malware ze systému odstranit. Analýzu malware lze provádět za různými účely ať už je to za účelem pochopení, jak malware funguje
@@ -145,7 +145,7 @@ Ovšem nevýhodou je takzvaný \uv{spící kód}. To znamená, že na rozdíl od
 neúplným pokrytím kódu \cite{article_analysis_goat}. Další nevýhodou je, že malwary jsou stále chytřejší a vědí, že se malware je spouštěn ve virtuálním prostřední, a proto záměrně zůstávají neaktivní dokud nejsou splněny určité podmínky. Takovýmto příkladem je třeba malware \textit{Loki} \cite{malware_analysis}.
 
 Během tohoto druhu analýzy,je možné zjistit všechny atributy chování, jako jsou otevřené soubory, vytvořené mutexy, s jakými servery malware komunikoval a jaké pakety byly odeslány a mnoho dalšího.
-Aby nedošlo k poškození uživatelského počítače, tak jsou vzorky malwaru spouštěny ve virtualních prostředích (častěji označovanými jako \textit{sandbox} prostředí nebo jen \textit{sandboxy}) \cite{malware_analysis}. Sandboxy slouží jako bezpečnostní pojistka, aby
+\label{sandbox}Aby nedošlo k poškození uživatelského počítače, tak jsou vzorky malwaru spouštěny ve virtualních prostředích (častěji označovanými jako \textit{sandbox} prostředí nebo jen \textit{sandboxy}) \cite{malware_analysis}. Sandboxy slouží jako bezpečnostní pojistka, aby
 nebylo nutné malware spouštět na svém počítači a tím ho vystavit nebezpečí. Ovšem drobnou nevýhodou sandbox prostředí je, že se dosažené výsledky analýzy mohou na různých operačních systémech lišit.
 
 Lze rozlišit dva základní přístupy dynamické analýzy a to jsou:
@@ -173,13 +173,13 @@ V této sekci byly deta představeny dva přístupy analýzy, které jsou velice
 %Jedna se o jednudochou pipeline a je na obrazku, jednotlive vstupy a vystupy casti jsou popsany v nasledujicich podkapitolach.
 
 Podstatnou a velice důležitou částí této práce je výběr a tvorba vhodných datových sad (z anglického \textit{datasets}).
-Protože v této práci je využito stojového učení, je na vytvoření žádoucí datové sady kladen velký důraz. 
+Protože v této práci je využito stojové učení, je na vytvoření žádoucí datové sady kladen velký důraz. 
 S daty totiž souvisí důveryhodnost dosažených výsledků.
 Proto byl pro tvorbu žádoucích datových sad vytvořen nástroj, který bude v následující kapitole představen. 
 
-Tato kapitola tedy pojednává o postupu vytváření datových sad. Nejprve je tento proces zjednodušeně popsán.
-Poté jsou zde detailně popsány jednotlivé části tohoto procesu popsány a co je jejich vstupem a výstupem.
-A nakonec jsou představeny technologie a programovací jazyk, který byl pro toto vytváření zvolen. 
+Tato kapitola tedy pojednává o postupu jakýn se datové sady vytvářejí . Nejprve je tento proces velice zjednodušeně popsán.
+Následně jsou zde detailně popsány nejdůležitější části tohoto procesu a také jejich vstupy a výstupy.
+Nakonec jsou představeny technologie a programovací jazyk, který byl pro vytváření tohoto nástroje zvolen. 
 
 %Tato kapitola tedy pojednává o vybraném programovacím jazyce a knihovnách používaných pro danou úlohu. 
 %Poté je popsána obecný proces vytváření těchto datových sad. A nakonec jsou zde popsány jednotlivé části tohoto procesu a 
@@ -188,9 +188,9 @@ A nakonec jsou představeny technologie a programovací jazyk, který byl pro to
 \section{Postup vytváření datových sad}
 Zjednodušený proces tvorby datasetů lze vidět na obrázku \ref{pipeline}, kde je znázorněno jednoduché schéma procesu, jak vytvořený nástroj pracuje. 
 
-Nejprve tedy nástroj stáhne odpovídající počet malware vzorků z volně dostupného databázového serveru. Tyto vzorky jsou pak poslány na server, kde je provedena dynamická analýza.
-Pro každý vzorek se provedou dvě analýzy každá na jiném referenčním stroji.
-Po dokončení analýzy vzorků jsou ke každému vzorku staženy dva soubory se zachycenou síťovou kumunikací malwaru v podobě \textit{pcap} souborů a ješte zpráva shrnující analýzu daného vzorku.
+Nejprve tedy nástroj stáhne odpovídající počet malware vzorků z volně dostupného databázového serveru. Tyto vzorky jsou pak poslány na další server, kde je provedena jejich dynamická a statická analýza (\ref{analysis}).
+Pro každý vzorek se provedou dvě dynamické analýzy každá na jiném referenčním stroji.
+Po jejich dokončení jsou ke každému vzorku staženy dva soubory se zachycenou síťovou kumunikací malwaru v podobě \textit{pcap} souborů a ješte zpráva obsahující výsledky analýz daného vzorku.
 Každá část tohoto procesu bude detailně popsáno v následujících sekcích, kde budou uvedy i příklady výstupů a výstupů dílčích částí.\\
 
 \begin{figure}[h]
@@ -201,16 +201,16 @@ Každá část tohoto procesu bude detailně popsáno v následujících sekcíc
 \end{figure}
 
 \section{Stahování malware vzorků}
-Prvním krokem je stažení dostatečného počtu malware vzorků pro jednotlivé malware rodiny. Jediným vstupem do toho nástroje od uživatele je tedy pouze textový soubor, který obsahuje
-jména rodin. Všechny vzorky jsou stahovány z veřejně dostupné databaze \textit{MalwareBazaar}\footnote{\href{https://bazaar.abuse.ch/}{https://bazaar.abuse.ch/}}. Tato databáze je 
+Prvním krokem je stažení dostatečného počtu malware vzorků pro jednotlivé malware rodiny \ref{family}. Jediným vstupem od uživatele do tohoto nástroje je pouze textový soubor, který obsahuje
+jména rodin. Všechny vzorky jsou stahovány z veřejně dostupné databáze \textit{MalwareBazaar}\footnote{\href{https://bazaar.abuse.ch/}{https://bazaar.abuse.ch/}}. Tato databáze je 
 bezplatná a lze stahovat neomezený počet vzorků na rozdíl od jiných databazí jako například \textit{VirusTotal}\footnote{\href{https://www.virustotal.com/gui/home/upload}{https://www.virustotal.com/}}.
 
-Názvy rodin malware musí být stejné jako je specifikuje \textit{MalwareBazaar}, aby nedošlo k nějaké záměně s jiným druhem malwaru. Každý vzorek je poté stažen, jako zaheslovaný zip soubor, aby omylem nedošlo k 
-jeho něchtěnému spuštění. Vzorky jsou uloženy podle rodin, aby z důvodu jednoduššího vyhledávání. Jediným omezením je maximalní počet malware vzorků stažených pro jednu rodinu, který činí 1000 vzorků.
+Jména malware rodin musí být stejné jako je specifikuje \textit{MalwareBazaar}, aby nedošlo k nějaké záměně s jiným druhem malwaru. Každý vzorek je poté stažen, jako zaheslovaný zip soubor, aby omylem nedošlo k 
+jeho něchtěnému spuštění. Vzorky jsou uloženy podle rodin z důvodu jednoduššího vyhledávání. Jediným omezením je maximalní počet malware vzorků stažených pro jednu rodinu, který činí 1000 vzorků.
 
 \section{Analýza vzorků}
 %popsat pcapy, jak probíha analyza, sandboxy
-V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analýza je prováděna v sandbox prostředení, aby nedošlo k žádnému poškození uživatelského počítače.
+V dalším kroku je nutné veškeré stažené vzorky analyzovat. Každá analýza je prováděna v sandbox prostředení \ref{sandbox}, aby nedošlo k žádnému poškození uživatelského počítače.
 Použitým sandbox prostředím pro analýzu je nástroj zvaný \textit{Triage}\footnote{\href{https://tria.ge/dashboard}{https://tria.ge/dashboard}}. Tento nástroj byl vybrán kvůli jeho škálovatelnosti a rychlosti, 
 ale především kvůli jeho komplexnímu API rozhraní.
 
@@ -221,7 +221,7 @@ systém Windows 7 a druhá analýza je prováděna v prostředí se systémem Wi
 
 \begin{figure}[h]
 	\centering
-        \includegraphics[width=0.6\textwidth]{obrazky/diagram.pdf}
+        \includegraphics[width=0.6\textwidth]{obrazky/diagram.drawio.pdf}
 	\caption{Proces analýzy malware vzorků}
     \label{Analysis_diagram}
 \end{figure}
