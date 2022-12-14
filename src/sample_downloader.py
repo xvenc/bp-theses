@@ -1,5 +1,5 @@
 import requests
-from os import path, mkdir
+from os import path
 from pathlib import Path
 from src.general import bcolors
 
@@ -11,9 +11,11 @@ class SampleDownloader:
     def _store_sample(self, out_dir, family, res, hash256):
         if out_dir[-1] != '/':
             out_dir += '/'
-        if not path.isdir(out_dir+family):
-            Path(out_dir+family).mkdir(parents=True, exist_ok=True)
-        with open(out_dir+family+'/'+hash256+'.zip', 'wb') as wf:
+        out_put = path.join(out_dir, family)
+        if not path.isdir(out_put):
+            Path(out_put).mkdir(parents=True, exist_ok=True)
+        
+        with open(path.join(out_put, hash256+'.zip'), 'wb') as wf:
             wf.write(res.content)
 
         print(bcolors.OKGREEN + "Downloaded malware sample: " + bcolors.OKBLUE + hash256+".zip" + bcolors.ENDC)

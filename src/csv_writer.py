@@ -36,7 +36,7 @@ def write_header(file, log_dir):
 # log sample id and from witch directory its from
 def log(sample_id : str, filename : str, log_f : str, client, log_dir):
     data = [filename, sample_id]
-    with open(log_dir+log_f, 'a') as f:
+    with open(path.join(log_dir, log_f), 'a') as f:
         # create the csv writer
         writer = csv.writer(f)
         # write a row to the csv file

@@ -21,7 +21,8 @@ class Downloader:
             output_dir += '/'
         if not path.isdir(output_dir):
             Path(output_dir).mkdir(parents=True, exist_ok=True)
-        with open("%s/%s_%s.pcap" % (output_dir,path.splitext(filename)[0],num), "wb") as wf:
+        to_open = path.join(output_dir, path.splitext(filename)[0]+f"_{num}")
+        with open(to_open, "wb") as wf:
                     wf.write(data)
         return True
 
@@ -75,10 +76,10 @@ class Downloader:
 
             # check if analysis finished
             if  status == 'reported':
-                self.download_sample(sample_id, 'behavioral1', pcap_dir+
-                                    subdir, filename, "1")
-                self.download_sample(sample_id, 'behavioral2', pcap_dir+
-                                    subdir, filename, "2")
+                self.download_sample(sample_id, 'behavioral1', path.join(pcap_dir, subdir),
+                                     filename, "1")
+                self.download_sample(sample_id, 'behavioral2', path.join(pcap_dir, subdir),
+                                     filename, "2")
 
                 report_f = create_file(path.splitext(filename)[0])
                 self._report(sample_id, report_dir+subdir, report_f)
@@ -90,18 +91,18 @@ class Downloader:
     def download_samples_for_directory(self, directory, family, family_dict, 
                                             report_dir, log_dir, pcap_dir):
         malware_dir = check_dir(directory)
-        for subdir, dirs, files in walk(malware_dir+family):
+        for root, dirs, files in walk(path.join(malware_dir, family)):
             # check if directory contain files, not only other directories
             if files == []:
                 continue
             print(bcolors.HEADER + "Downloading pcap files for directory: " +
-                    bcolors.OKBLUE + f"{subdir}" + bcolors.ENDC)
+                    bcolors.OKBLUE + f"{root}" + bcolors.ENDC)
 
             with open(log_dir+family_dict[family.lower()],mode='r') as csv_file:
                 content = csv.DictReader(csv_file)
                 for row in content:
-                    f = path.join(subdir, row['Filename'])
+                    f = path.join(root, row['Filename'])
                     # checking if it is a file and wasnt already downloaded
-                    if path.isfile(f) and not check_downloaded(report_dir+subdir, f):
+                    if path.isfile(f) and not check_downloaded(path.join(report_dir, family), f):
                         self._download_wait(row['Sample_id'], row['Filename'],
-                                                    pcap_dir, subdir, report_dir)
+                                                    pcap_dir, family, report_dir)

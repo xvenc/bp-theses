@@ -45,14 +45,13 @@ Commands:
     Options for get:
         -m	Specifies malware family. If the family is 2 words, than it needs to be in "" ("Smoke Loader")
         -l	Specifies how many samples of given family we want. (Maximum is 1000)
-        -d	Specifies output directory name for dowloaded samples
+        -o	Specifies output directory name for dowloaded samples
 
     --all	Downloads n malware samples of specified family and runs analysis and than stores the pcap files
     Options for all:
         -m	Specifies malware family. Or .txt file with malware family names each on new line of the file
         -l	Specifies how many samples of given family we want. (Maximum is 1000)
-        -o	Specifies output directory name for dowloaded pcaps
-        -d	Specifies output directory for malware samples.
+        -o	Specifies output directory name. In this directory will be created folders malware, pcaps and reports
 
 Report and log files are automaticaly created. The file name is based on the input directory.
 COMMAND arguments can't be combined.
@@ -65,47 +64,50 @@ All these individual examples consist of 3 part:
 * Command execution and output.
 * Folder content after the program was executed.
 ```
-Download malware, then upload to tria.ge and download pcaps
+Download malware, then upload to tria.ge and download pcaps. Command --all.
 $ ls
 example_family.txt  README.md  requirements.txt  src/  triage_client.py
 
-$ python3 triage_client.py --all -m example_family.txt -l 1 -d malware -o pcaps
+$ python3 triage_client.py --all -m example_family.txt -l 1 -o out
 
 Queried 1 samples for family redlinestealer. Now the samples will be downloaded.
 Downloaded malware sample: malware1.zip
-Submitting files from directory: malware/redlinestealer
+Submitting files from directory: out/malware/redlinestealer
 Submitted malware for analysis: malware1.zip
 Queried 1 samples for family Mirai. Now the samples will be downloaded.
 Downloaded malware sample: malware2.zip
-Submitting files from directory: malware/mirai
+Submitting files from directory: out/malware/mirai
 Submitted malware for analysis: malware2.zip
 Queried 1 samples for family Heodo. Now the samples will be downloaded.
 Downloaded malware sample: malware3.zip
-Submitting files from directory: malware/heodo
+Submitting files from directory: out/malware/heodo
 Submitted malware for analysis: malware3.zip
 Queried 1 samples for family AgentTesla. Now the samples will be downloaded.
 Downloaded malware sample: malware4.zip
-Submitting files from directory: malware/agenttesla
+Submitting files from directory: out/malware/agenttesla
 Submitted malware for analysis: malware4.zip
 Downloading pcap for uploaded samples...
-Downloading pcap files for directory: malware/redlinestealer
+Downloading pcap files for directory: out/malware/redlinestealer
 Downloaded pcap for malware1.zip
-Downloading pcap files for directory: malware/mirai
+Downloading pcap files for directory: out/malware/mirai
 Downloaded pcap for malware2.zip
-Downloading pcap files for directory: malware/heodo
+Downloading pcap files for directory: out/malware/heodo
 Downloaded pcap for malware3.zip
-Downloading pcap files for directory: malware/agenttesla
+Downloading pcap files for directory: out/malware/agenttesla
 Downloaded pcap for malware4.zip
 
 $ ls
-example_family.txt logs/  malware/  pcaps/  README.md  reports/  requirements.txt  src/  triage_client.py
+example_family.txt logs/  out/  README.md   requirements.txt  src/  triage_client.py
+
+$ ls out
+malware  pcaps  reports
 ```
 ```
-Download malware samples for family redlinestealer
+Download malware samples for family redlinestealer. Command --get.
 $ ls 
 example_family.txt  README.md  requirements.txt  src/  triage_client.py
 
-$ python3 triage_client.py --get -m "Smoke Loader" -d malware/ -l 2
+$ python3 triage_client.py --get -m "Smoke Loader" -o malware/ -l 2
 
 Queried 2 samples for family redlinestealer. Now the samples will be downloaded.
 Downloaded malware sample: malware4.zip
@@ -115,7 +117,7 @@ $ ls
 example_family.txt logs/  malware/  README.md  requirements.txt  src/  triage_client.py
 ```
 ```
-Submit directory for analysis 
+Submit directory for analysis. Command --submit 
 $ ls 
 example_family.txt malware/  README.md  requirements.txt  src/  triage_client.py
 

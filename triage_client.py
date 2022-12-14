@@ -6,13 +6,15 @@ import csv
 import time
 from src.pcap_downloader import Downloader
 from src.sample_downloader import SampleDownloader
-from src.general import bcolors, help, check_dir
+from src.general import bcolors, help, check_dir, create_folders
 from src.sample_uploader import Uploader
 
 public_api = "https://api.tria.ge/"
 auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
 report_dir = "reports/"
 log_dir = "logs/"
+pcap_dir = "pcaps/"
+malware_dir = "malware/"
 
 # parse command line arguments
 def arg_parse():
@@ -73,7 +75,7 @@ client = triage.Client(auth_api_key, public_api)
 command,option = arg_parse()
 d = Downloader(public_api+"v0/samples/", auth_api_key, client)
 sample_down = SampleDownloader()
-uploader = Uploader(report_dir, client, log_dir)
+uploader = Uploader(client, log_dir)
 
 # submit file or whole directory with files
 if command['--submit']:
@@ -99,7 +101,7 @@ elif command['--get']:
         bcolors.ENDC + option['-m'][1])
         exit(1)
 
-    if sample_down.download_samples(samples_json,option['-d'][1], option['-m'][1].lower()):
+    if sample_down.download_samples(samples_json,option['-o'][1], option['-m'][1].lower()):
         print(bcolors.FAIL + "Couldnt download samples for family " + 
         bcolors.ENDC + option['-m'][1].lower())
 
@@ -107,8 +109,13 @@ elif command['--get']:
 # then upload the samples to tria.ge to analysis and dowloading
 # corresponding pcap files
 elif command['--all']:
-    pcap_dir = check_dir(option['-o'][1])
+    output = check_dir(option['-o'][1])
     data = read_lines(option['-m'][1])
+    create_folders(output, malware_dir, pcap_dir, report_dir)
+    malware_dir = path.join(output, malware_dir)
+    report_dir = path.join(output, report_dir)
+    pcap_dir = path.join(output, pcap_dir)
+
     for family in data:
         # Download samples
         data_json, err = sample_down.get_query(family, int(option['-l'][1]))
@@ -117,14 +124,15 @@ elif command['--all']:
             bcolors.ENDC + family)
             continue
         family = family.lower().replace(" ","")
-        if sample_down.download_samples(data_json, option['-d'][1], family):
+        if sample_down.download_samples(data_json, malware_dir, family):
             print(bcolors.FAIL + "Couldnt download samples for family " +
             bcolors.ENDC + family)
             continue
 
         # Submit samples
-        if option['-d'][0] and path.isdir(option["-d"][1]):
-            uploader.submit_directory(option, client, family)
+        if path.isdir(malware_dir):
+            uploader.submit_directory(malware_dir, client, family, report_dir)
+
 
     print("Downloading pcaps for uploaded samples...")
     time.sleep(300)
@@ -133,5 +141,5 @@ elif command['--all']:
     for family in data:
         family = family.lower().replace(" ","")
         if family in family_dict:
-            d.download_samples_for_directory(option['-d'][1],
+            d.download_samples_for_directory(malware_dir,
             family, family_dict, report_dir, log_dir, pcap_dir)

@@ -1,3 +1,5 @@
+from pathlib import Path
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -26,13 +28,12 @@ def help():
     print(bcolors.OKCYAN+"  Options for get:"+bcolors.ENDC)
     print("\t-m\tSpecifies malware family. If the family consist of 2 words, it needs to be in \"\"(\"Smoke Loader\") ")
     print("\t-l\tSpecifies how many samples of given family we want.")
-    print('\t-d\tSpecifies output directory name for dowloaded samples')
+    print('\t-o\tSpecifies output directory name for dowloaded samples')
     print(bcolors.OKBLUE+"\n  --all"+bcolors.ENDC+"\tDownloads n malware samples of specified family and runs analysis and than stores the pcap files")
     print(bcolors.OKCYAN+"  Options for all:"+bcolors.ENDC)
     print("\t-m\tSpecifies malware family. Or .txt file with malware family names each on new line of the file")
     print("\t-l\tSpecifies how many samples of given family we want.")
-    print('\t-o\tSpecifies output directory name for dowloaded pcaps')
-    print("\t-d\tSpecifies output directory for malware samples.")
+    print('\t-o\tSpecifies output directory name. In this directory will be created folders malware, pcaps and reports')
     print("\nLog and report files are automaticaly created. The file name is based on the input directory")
 
 
@@ -41,3 +42,10 @@ def check_dir(directory):
     if directory[-1] != '/':
         directory += '/'
     return directory
+
+# Create folder structure
+def create_folders(out_dir, malware, pcaps, reports):
+    Path(out_dir+malware).mkdir(parents=True, exist_ok=True)
+    Path(out_dir+pcaps).mkdir(parents=True, exist_ok=True)
+    Path(out_dir+reports).mkdir(parents=True, exist_ok=True)
+
