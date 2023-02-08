@@ -1,2 +1,13 @@
 redlinestealer
 Mirai
+Heodo
+AgentTesla
+Smoke Loader
+Amadey
+Loki
+RemcosRAT
+RaccoonStealer
+Formbook
+CoinMiner
+RedNet
+GCleaner
