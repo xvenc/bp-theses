@@ -5,3 +5,4 @@ pcaps/
 backup/
 __pycache__/
 out/
+*.txt
