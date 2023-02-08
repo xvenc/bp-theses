@@ -9,7 +9,8 @@ class Extractor:
     dict: IOC's -> malware
     list: malware -> number of IOS's
     """
-    ioc_map = {}
+    ioc_map = {} # dictionary to map ioc indicator to family
+    ioc_cnt = {} # dictionary to map family to exact number of indicators
 
     def __init__(self, report_dir = "out/reports/"):
         self.dir = report_dir
@@ -20,38 +21,38 @@ class Extractor:
     def _get_iocs(self, report):
         if report['targets'] != None and 'iocs' in report['targets'][0]:
             return report['targets'][0]['iocs']
-
         return None
 
-    def _inser(self, iocs, family):
+    def _inser(self, iocs, family, cnt):
         for key, vals in iocs.items():
             for val in vals:
                 self.ioc_map[val] = family
-
+                cnt += 1
+        return cnt
 
     def extract(self):
 
         for root, dirs, files in walk(self.dir):
+            cnt = 0
             family = self._family_name(root)
-            if family == '':
+            if family == "":
                 continue
             for filename in files:
                 with open(path.join(root, filename)) as j_file:
                     report = json.load(j_file)
-                    print(self._get_iocs(report))
                     iocs = self._get_iocs(report)
-                    self._inser(iocs, family)
-                    break
-            break
-                    
+                    if iocs != None:
+                        cnt = self._inser(iocs, family, cnt)
+
+            self.ioc_cnt[family] = cnt
+
     def ioc_print(self):
-        for key, val in self.ioc_map.items():
-            print(key, " ", val)
+        for key, val in self.ioc_cnt.items():
+            print(f"Family {key} - {val} indicators")
 
 def argparse():
 
     arguments = {'-d' : [False, ""]}
-
     try:
         options, args = getopt.getopt(sys.argv[1:], "d:", ["help"])
     except:
