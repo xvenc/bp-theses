@@ -21,7 +21,7 @@ class Downloader:
             output_dir += '/'
         if not path.isdir(output_dir):
             Path(output_dir).mkdir(parents=True, exist_ok=True)
-        to_open = path.join(output_dir, path.splitext(filename)[0]+f"_{num}")
+        to_open = path.join(output_dir, path.splitext(filename)[0]+f"_{num}.pcap")
         with open(to_open, "wb") as wf:
                     wf.write(data)
         return True
