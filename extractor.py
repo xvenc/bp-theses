@@ -30,7 +30,7 @@ class Extractor:
                 cnt += 1
         return cnt
 
-    def extract(self):
+    def extract(self, args):
 
         for root, dirs, files in walk(self.dir):
             cnt = 0
@@ -38,11 +38,12 @@ class Extractor:
             if family == "":
                 continue
             for filename in files:
-                with open(path.join(root, filename)) as j_file:
-                    report = json.load(j_file)
-                    iocs = self._get_iocs(report)
-                    if iocs != None:
-                        cnt = self._inser(iocs, family, cnt)
+                if not args['-m'][0] or path.splitext(filename)[0] == args['-m'][1]:
+                    with open(path.join(root, filename)) as j_file:
+                        report = json.load(j_file)
+                        iocs = self._get_iocs(report)
+                        if iocs != None:
+                            cnt = self._inser(iocs, family, cnt)
 
             self.ioc_cnt[family] = cnt
 
@@ -50,11 +51,19 @@ class Extractor:
         for key, val in self.ioc_cnt.items():
             print(f"Family {key} - {val} indicators")
 
+    def ioc_spec_print(self, sample):
+        i = 0
+        for key, val in self.ioc_map.items():
+            if i == 0:
+                print(f"IOC's for family {val} and sample {sample} - {self.ioc_cnt[val]} IOC's.")
+                i += 1
+            print(key)
+
 def argparse():
 
-    arguments = {'-d' : [False, ""]}
+    arguments = {'-d' : [False, ""], '-m' : [False, ""]}
     try:
-        options, args = getopt.getopt(sys.argv[1:], "d:", ["help"])
+        options, args = getopt.getopt(sys.argv[1:], "d:m:", ["help"])
     except:
     #    help()
         print("Error")
@@ -68,8 +77,13 @@ def argparse():
             arguments[opt][0] = True
             arguments[opt][1] = arg
 
+    return arguments
+
 # MAIN
-argparse()
+args = argparse()
 extractor = Extractor()
-extractor.extract()
-extractor.ioc_print()
+extractor.extract(args)
+if args['-m'][0]:
+    extractor.ioc_spec_print(args['-m'][1])
+else:
+    extractor.ioc_print()
