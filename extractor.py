@@ -2,6 +2,7 @@ import json
 import getopt
 import sys
 from os import walk, path
+from classifier import Classifier
 
 class Extractor:
 
@@ -82,8 +83,13 @@ def argparse():
 # MAIN
 args = argparse()
 extractor = Extractor()
+classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
+
 extractor.extract(args)
-if args['-m'][0]:
-    extractor.ioc_spec_print(args['-m'][1])
-else:
-    extractor.ioc_print()
+classifier.classify("test_tmp/eve-nsm.json")
+
+
+#if args['-m'][0]:
+#    extractor.ioc_spec_print(args['-m'][1])
+#else:
+#    extractor.ioc_print()
