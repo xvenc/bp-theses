@@ -52,13 +52,14 @@ class Extractor:
         for key, val in self.ioc_cnt.items():
             print(f"Family {key} - {val} indicators")
 
-    def ioc_spec_print(self, sample):
+    def ioc_spec_print(self, sample, key_yes):
         i = 0
         for key, val in self.ioc_map.items():
             if i == 0:
                 print(f"IOC's for family {val} and sample {sample} - {self.ioc_cnt[val]} IOC's.")
                 i += 1
-            print(key)
+            if key_yes:
+                print(key)
 
 def argparse():
 
@@ -86,10 +87,10 @@ extractor = Extractor()
 classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
 
 extractor.extract(args)
-classifier.classify("test_tmp/eve-nsm.json")
+classifier.classify("test_tmp/eve-nsm-bigger.json")
+classifier.classify("test_tmp/eve-ips-bigger.json")
 
-
-#if args['-m'][0]:
-#    extractor.ioc_spec_print(args['-m'][1])
+if args['-m'][0]:
+    extractor.ioc_spec_print(args['-m'][1], False)
 #else:
 #    extractor.ioc_print()

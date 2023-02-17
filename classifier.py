@@ -1,26 +1,58 @@
 import json
+import re
 
 class Classifier:
 
-    matched = {}
+    ioc_match = {}
+    match_cnt = 0
+
     def __init__(self, ioc_map, ioc_cnt):
         self.iocs = ioc_map
         self.cnt = ioc_cnt
 
-    def _score(self, match):
+    def _score(self):
         families = set(val for val in self.iocs.values())
         for family in families:
-            print(f"The score for family {family} is {round(match/self.cnt[family] * 100, 2)}%")
-            print(f"{match} successful matches.")
+            print(f"The score for family {family} is {round(self.match_cnt/self.cnt[family] * 100, 2)}%")
+            print(f"{self.match_cnt} successful matches.")
+            #print(self.ioc_match)
+
+    def _extract(self, json_obj):
+        if json_obj['event_type'] == 'dns':
+            return json_obj['dns']['rrname']
+
+        elif json_obj['event_type'] == 'http':
+            ip = self._extract_ip(json_obj)
+            if not ip:
+                return "http://" + json_obj['http']['hostname'] + '/'
+            return ip
+
+        elif json_obj['event_type'] == 'tls':
+            return self._extract_ip(json_obj)
+        else:
+            return None
+
+    def _extract_ip(self, json_obj):
+        if json_obj['event_type'] in ['flow', 'tls', 'http']:
+            if json_obj['src_ip'] in self.iocs:
+                return json_obj['src_ip']
+            elif json_obj['dest_ip'] in self.iocs:
+                return json_obj['dest_ip']
+
+        return None
 
     def classify(self, file):
 
-        match = 0
         for record in open(file, 'r'):
             json_obj = json.loads(record)
-            if json_obj['dns']['rrname'] in self.iocs and json_obj['dns']['rrname'] not in self.matched:
-                self.matched[json_obj['dns']['rrname']] = self.iocs[json_obj['dns']['rrname']]
-                match += 1
+            ioc = self._extract(json_obj)
+            ip_match = self._extract_ip(json_obj)
+            if ioc in self.iocs and ioc not in self.ioc_match or ip_match != None and ip_match not in self.ioc_match:
+                if ioc:
+                    self.ioc_match[ioc] = self.iocs[ioc]
+                else:
+                    self.ioc_match[ip_match] = self.iocs[ip_match]
+                self.match_cnt += 1
 
-        self._score(match)
+        self._score()
 
