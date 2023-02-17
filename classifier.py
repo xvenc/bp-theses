@@ -1,5 +1,4 @@
 import json
-import re
 
 class Classifier:
 
@@ -10,22 +9,23 @@ class Classifier:
         self.iocs = ioc_map
         self.cnt = ioc_cnt
 
-    def _score(self):
+    def score(self):
         families = set(val for val in self.iocs.values())
         for family in families:
-            print(f"The score for family {family} is {round(self.match_cnt/self.cnt[family] * 100, 2)}%")
-            print(f"{self.match_cnt} successful matches.")
-            #print(self.ioc_match)
+            print(f"The score for family {family} is {round(self.match_cnt/self.cnt[family] * 100, 2)}%. With {self.match_cnt} successful matches.")
+            print(self.ioc_match)
+
+    def _extract_http(self, json_obj):
+        http = 'http://' + json_obj['http']['hostname']
+        if json_obj['http']['url']:
+            return http + json_obj['http']['url']
 
     def _extract(self, json_obj):
         if json_obj['event_type'] == 'dns':
             return json_obj['dns']['rrname']
 
         elif json_obj['event_type'] == 'http':
-            ip = self._extract_ip(json_obj)
-            if not ip:
-                return "http://" + json_obj['http']['hostname'] + '/'
-            return ip
+            return self._extract_http(json_obj)
 
         elif json_obj['event_type'] == 'tls':
             return self._extract_ip(json_obj)
@@ -33,7 +33,7 @@ class Classifier:
             return None
 
     def _extract_ip(self, json_obj):
-        if json_obj['event_type'] in ['flow', 'tls', 'http']:
+        if json_obj['event_type'] in ['flow', 'tls']:
             if json_obj['src_ip'] in self.iocs:
                 return json_obj['src_ip']
             elif json_obj['dest_ip'] in self.iocs:
@@ -54,5 +54,5 @@ class Classifier:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
                 self.match_cnt += 1
 
-        self._score()
+        #self.score()
 

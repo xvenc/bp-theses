@@ -87,10 +87,11 @@ extractor = Extractor()
 classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
 
 extractor.extract(args)
-classifier.classify("test_tmp/eve-nsm-bigger.json")
-classifier.classify("test_tmp/eve-ips-bigger.json")
+classifier.classify("test_tmp/eve-nsm.json")
+classifier.classify("test_tmp/eve-ips.json")
+classifier.score()
 
-if args['-m'][0]:
-    extractor.ioc_spec_print(args['-m'][1], False)
+#if args['-m'][0]:
+#    extractor.ioc_spec_print(args['-m'][1], True)
 #else:
 #    extractor.ioc_print()
