@@ -3,7 +3,7 @@ import json
 class Classifier:
 
     ioc_match = {}
-    match_cnt = 0
+    match_cnt = {}
 
     def __init__(self, ioc_map, ioc_cnt):
         self.iocs = ioc_map
@@ -12,8 +12,11 @@ class Classifier:
     def score(self):
         families = set(val for val in self.iocs.values())
         for family in families:
-            print(f"The score for family {family} is {round(self.match_cnt/self.cnt[family] * 100, 2)}%. With {self.match_cnt} successful matches.")
-            print(self.ioc_match)
+            print(f"The score for family {family} is {round(self.match_cnt[family]/self.cnt[family] * 100, 2)}%. With {self.match_cnt[family]} successful matches.")
+
+    def init_counter(self):
+        for family in set(val for val in self.iocs.values()):
+            self.match_cnt[family] = 0
 
     def _extract_http(self, json_obj):
         http = 'http://' + json_obj['http']['hostname']
@@ -42,7 +45,6 @@ class Classifier:
         return None
 
     def classify(self, file):
-
         for record in open(file, 'r'):
             json_obj = json.loads(record)
             ioc = self._extract(json_obj)
@@ -50,9 +52,9 @@ class Classifier:
             if ioc in self.iocs and ioc not in self.ioc_match or ip_match != None and ip_match not in self.ioc_match:
                 if ioc:
                     self.ioc_match[ioc] = self.iocs[ioc]
+                    self.match_cnt[self.iocs[ioc]] += 1
                 else:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
-                self.match_cnt += 1
+                    self.match_cnt[self.iocs[ip_match]] += 1
 
-        #self.score()
 

@@ -87,8 +87,9 @@ extractor = Extractor()
 classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
 
 extractor.extract(args)
+classifier.init_counter()
 classifier.classify("test_tmp/eve-nsm.json")
-classifier.classify("test_tmp/eve-ips.json")
+classifier.classify("test_tmp/eve-flow.json")
 classifier.score()
 
 #if args['-m'][0]:
