@@ -1,14 +1,11 @@
 import json
-import getopt
-import sys
 from os import walk, path
-from classifier import Classifier
 
 class Extractor:
 
     """
     dict: IOC's -> malware
-    list: malware -> number of IOS's
+    dict: malware_cnt -> number of IOS's
     """
     ioc_map = {} # dictionary to map ioc indicator to family
     ioc_cnt = {} # dictionary to map family to exact number of indicators
@@ -24,15 +21,15 @@ class Extractor:
             return report['targets'][0]['iocs']
         return None
 
-    def _inser(self, iocs, family, cnt):
+    def _inser(self, iocs, family, cnt, ioc_type):
         for key, vals in iocs.items():
-            for val in vals:
-                self.ioc_map[val] = family
-                cnt += 1
+            if not ioc_type or key == ioc_type:
+                for val in vals:
+                    self.ioc_map[val] = family
+                    cnt += 1
         return cnt
 
-    def extract(self, args):
-
+    def extract(self, args, ioc_type):
         for root, dirs, files in walk(self.dir):
             cnt = 0
             family = self._family_name(root)
@@ -44,7 +41,7 @@ class Extractor:
                         report = json.load(j_file)
                         iocs = self._get_iocs(report)
                         if iocs != None:
-                            cnt = self._inser(iocs, family, cnt)
+                            cnt = self._inser(iocs, family, cnt, ioc_type)
 
             self.ioc_cnt[family] = cnt
 
@@ -61,38 +58,4 @@ class Extractor:
             if key_yes:
                 print(key)
 
-def argparse():
 
-    arguments = {'-d' : [False, ""], '-m' : [False, ""]}
-    try:
-        options, args = getopt.getopt(sys.argv[1:], "d:m:", ["help"])
-    except:
-    #    help()
-        print("Error")
-        sys.exit(1)
-
-    for opt, arg in options:
-        if opt == "--help":
-            print("HELP")
-            sys.exit(0)
-        elif opt in arguments:
-            arguments[opt][0] = True
-            arguments[opt][1] = arg
-
-    return arguments
-
-# MAIN
-args = argparse()
-extractor = Extractor()
-classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
-
-extractor.extract(args)
-classifier.init_counter()
-classifier.classify("test_tmp/eve-nsm.json")
-classifier.classify("test_tmp/eve-flow.json")
-classifier.score()
-
-#if args['-m'][0]:
-#    extractor.ioc_spec_print(args['-m'][1], True)
-#else:
-#    extractor.ioc_print()
