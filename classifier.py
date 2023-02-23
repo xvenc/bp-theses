@@ -13,6 +13,7 @@ class Classifier:
         families = set(val for val in self.iocs.values())
         for family in families:
             print(f"The score for family {family} is {round(self.match_cnt[family]/self.cnt[family] * 100, 2)}%. With {self.match_cnt[family]} successful matches.")
+        print(self.ioc_match)
 
     def init_counter(self):
         for family in set(val for val in self.iocs.values()):
@@ -57,4 +58,8 @@ class Classifier:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
                     self.match_cnt[self.iocs[ip_match]] += 1
 
+    # TODO Function for live capture of malicious activity
+    def live_capture(self, file):
+        for record in open(file, 'r'):
+            pass
 
