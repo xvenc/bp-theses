@@ -55,10 +55,12 @@ class Classifier:
                 if ioc:
                     self.ioc_match[ioc] = self.iocs[ioc]
                     self.match_cnt[self.iocs[ioc]] += 1
-                else:
+
+                elif ip_match:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
                     self.match_cnt[self.iocs[ip_match]] += 1
 
+    # Function to read last entry from log file
     def _tail(self, file_stream):
         file_stream.seek(0, os.SEEK_END)
 
@@ -69,13 +71,28 @@ class Classifier:
             line = file_stream.readline()
             yield line
 
-
-    # TODO Function for live capture of malicious activity
+    # Function used to read log latest record from file and to proccess these records 
     def live_capture(self, file):
         for record in self._tail(open(file, 'r')):
             try:
                 json_obj = json.loads(record)
             except ValueError:
+                # Possible corrupt json entry, so skip to the next one
                 continue
-            print(json_obj)
+            # Extract iocs and ips from suricata log
+            ioc = self._extract(json_obj)
+            ip_match = self._extract_ip(json_obj)
 
+            # Check if any of extracted info from suricata is in our malicious IOCs
+            # And if it wasn't already matched
+            if (ioc in self.iocs and ioc not in self.ioc_match) or \
+                (ip_match != None and ip_match not in self.ioc_match):
+
+                if ioc:
+                    self.ioc_match[ioc] = self.iocs[ioc]
+                    self.match_cnt[self.iocs[ioc]] += 1
+                    print(f"Warning possible malicious activity was found. ioc: {ioc}")
+                elif ip_match:
+                    self.ioc_match[ip_match] = self.iocs[ip_match]
+                    self.match_cnt[self.iocs[ip_match]] += 1
+                    print(f"Warning possible malicious activity was found. ip: {ioc}")
