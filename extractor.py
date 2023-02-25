@@ -58,4 +58,11 @@ class Extractor:
             if key_yes:
                 print(key)
 
+    def only_iocs(self):
+        families = []
+        for key, val in self.ioc_map.items():
+            if val not in families:
+                print(f"\nFamily {val}\n")
+                families.append(val)
+            print(key)
 
