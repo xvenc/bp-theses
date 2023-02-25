@@ -1,4 +1,5 @@
 import json
+import os
 
 class Classifier:
 
@@ -58,8 +59,23 @@ class Classifier:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
                     self.match_cnt[self.iocs[ip_match]] += 1
 
+    def _tail(self, file_stream):
+        file_stream.seek(0, os.SEEK_END)
+
+        while True:
+            if file_stream.closed:
+                raise StopIteration
+
+            line = file_stream.readline()
+            yield line
+
+
     # TODO Function for live capture of malicious activity
     def live_capture(self, file):
-        for record in open(file, 'r'):
-            pass
+        for record in self._tail(open(file, 'r')):
+            try:
+                json_obj = json.loads(record)
+            except ValueError:
+                continue
+            print(json_obj)
 
