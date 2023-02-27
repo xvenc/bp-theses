@@ -71,6 +71,10 @@ class Classifier:
             line = file_stream.readline()
             yield line
 
+    def _increment(self, ioc):
+        for family in self.iocs[ioc]:
+            self.match_cnt[family] += 1
+
     # Function used to read log latest record from file and to proccess these records 
     def live_capture(self, file):
         for record in self._tail(open(file, 'r')):
@@ -90,9 +94,11 @@ class Classifier:
 
                 if ioc:
                     self.ioc_match[ioc] = self.iocs[ioc]
-                    self.match_cnt[self.iocs[ioc]] += 1
-                    print(f"Warning possible malicious activity was found. ioc: {ioc}")
+                    #self.match_cnt[self.iocs[ioc]] += 1
+                    self._increment(ioc)
+                    print(f"Warning possible malicious activity was found. IOC: {ioc}")
                 elif ip_match:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
-                    self.match_cnt[self.iocs[ip_match]] += 1
-                    print(f"Warning possible malicious activity was found. ip: {ip_match}")
+                    #self.match_cnt[self.iocs[ip_match]] += 1
+                    self._increment(ip_match)
+                    print(f"Warning possible malicious activity was found. IP: {ip_match}")
