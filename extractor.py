@@ -25,8 +25,16 @@ class Extractor:
         for key, vals in iocs.items():
             if not ioc_type or key == ioc_type:
                 for val in vals:
-                    self.ioc_map[val] = family
-                    cnt += 1
+                   # self.ioc_map[val] = family
+                   # cnt += 1
+                    if val not in self.ioc_map:
+                        self.ioc_map[val] = []
+                        self.ioc_map[val].append(family)
+                        cnt += 1
+                    elif family not in self.ioc_map[val]:
+                        self.ioc_map[val].append(family)
+                        #print(self.ioc_map[val], " ", val)
+                        cnt += 1
         return cnt
 
     def extract(self, args, ioc_type):
@@ -42,8 +50,7 @@ class Extractor:
                         iocs = self._get_iocs(report)
                         if iocs != None:
                             cnt = self._inser(iocs, family, cnt, ioc_type)
-
-            self.ioc_cnt[family] = cnt
+                            self.ioc_cnt[family] = cnt
 
     def ioc_print(self):
         for key, val in self.ioc_cnt.items():
@@ -65,4 +72,13 @@ class Extractor:
                 print(f"\nFamily {val}\n")
                 families.append(val)
             print(key)
+
+    def family_iocs(self, family):
+        for key, vals in self.ioc_map.items():
+           # if vals == family:
+           #     print(key)
+            for val in vals:
+                if val == family:
+                    print(key)
+
 
