@@ -28,11 +28,11 @@ class Classifier:
         if json_obj['dns']['type'] == 'query':
             return json_obj['dns']['rrname']
         elif json_obj['dns']['type'] == 'answer':
-            for key, vals in json_obj['dns']['grouped'].items():
-                for val in vals:
-                    if val in self.iocs:
-                        return val
-
+            if 'grouped' in json_obj['dns']:
+                for key, vals in json_obj['dns']['grouped'].items():
+                    for val in vals:
+                        if val in self.iocs:
+                            return val
         return None
 
     def _extract(self, json_obj):
