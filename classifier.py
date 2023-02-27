@@ -17,7 +17,7 @@ class Classifier:
         print(self.ioc_match)
 
     def init_counter(self):
-        for family in set(val for val in self.iocs.values()):
+        for family in set(val for val in self.cnt.values()):
             self.match_cnt[family] = 0
 
     def _extract_http(self, json_obj):
@@ -95,4 +95,4 @@ class Classifier:
                 elif ip_match:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
                     self.match_cnt[self.iocs[ip_match]] += 1
-                    print(f"Warning possible malicious activity was found. ip: {ioc}")
+                    print(f"Warning possible malicious activity was found. ip: {ip_match}")
