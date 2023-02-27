@@ -13,7 +13,7 @@ class Classifier:
     def score(self):
         for family in set(val for val in self.cnt.keys()):
             print(f"The score for family {family} is {round(self.match_cnt[family]/self.cnt[family] * 100, 2)}%. With {self.match_cnt[family]} successful matches.")
-        print(self.ioc_match)
+        #print(self.ioc_match)
 
     def init_counter(self):
         for family in set(val for val in self.cnt.keys()):
@@ -24,9 +24,20 @@ class Classifier:
         if json_obj['http']['url']:
             return http + json_obj['http']['url']
 
+    def _extract_dns(self, json_obj):
+        if json_obj['dns']['type'] == 'query':
+            return json_obj['dns']['rrname']
+        elif json_obj['dns']['type'] == 'answer':
+            for key, vals in json_obj['dns']['grouped'].items():
+                for val in vals:
+                    if val in self.iocs:
+                        return val
+
+        return None
+
     def _extract(self, json_obj):
         if json_obj['event_type'] == 'dns':
-            return json_obj['dns']['rrname']
+            return self._extract_dns(json_obj)
 
         elif json_obj['event_type'] == 'http':
             return self._extract_http(json_obj)
@@ -37,7 +48,7 @@ class Classifier:
             return None
 
     def _extract_ip(self, json_obj):
-        if json_obj['event_type'] in ['flow', 'tls']:
+        if json_obj['event_type'] in ['flow']:
             if json_obj['src_ip'] in self.iocs:
                 return json_obj['src_ip']
             elif json_obj['dest_ip'] in self.iocs:
@@ -50,14 +61,15 @@ class Classifier:
             json_obj = json.loads(record)
             ioc = self._extract(json_obj)
             ip_match = self._extract_ip(json_obj)
-            if ioc in self.iocs and ioc not in self.ioc_match or ip_match != None and ip_match not in self.ioc_match:
+            if (ioc in self.iocs and ioc not in self.ioc_match) or \
+                (ip_match != None and ip_match not in self.ioc_match):
+
                 if ioc:
                     self.ioc_match[ioc] = self.iocs[ioc]
-                    self.match_cnt[self.iocs[ioc]] += 1
-
+                    self._increment(ioc)
                 elif ip_match:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
-                    self.match_cnt[self.iocs[ip_match]] += 1
+                    self._increment(ip_match)
 
     # Function to read last entry from log file
     def _tail(self, file_stream):
