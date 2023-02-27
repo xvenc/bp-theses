@@ -6,7 +6,7 @@ import os
 from classifier import Classifier
 from extractor import Extractor
 
-suricata_log = "test_tmp/"
+suricata_log = "test_tmp/eve-nsm.json"
 
 # Function to parse command line arguments
 def argparse():
@@ -53,16 +53,11 @@ signal.signal(signal.SIGINT, handler)
 
 classifier.init_counter() # Init counters for each family
 
-# TODO live capture and score board
-# If in common.txt than 1 point, if in infected than 5 points, other 2 points
+# TODO score board. If in common.txt than 1 point, if in infected than 5 points, other 2 points
 while True and cmds['--live']:
-    # Classify flows, http, dns and tls
     # classifier.classify(os.path.join(suricata_log, "eve-nsm.json"))
     # classifier.classify(os.path.join(suricata_log, "eve-flow.json"))
-    classifier.live_capture(os.path.join(suricata_log, "eve-nsm.json"))
-    # TODO print found IOC's and mby clear the read file
-
-    time.sleep(4)
+    classifier.live_capture(suricata_log)
 
 # Print statistics about families and found IOC's
 if args['-m'][0]:
@@ -71,3 +66,4 @@ elif args['-t'][0]:
     extractor.only_iocs()
 else:
     extractor.ioc_print()
+    #extractor.family_iocs("smokeloader")
