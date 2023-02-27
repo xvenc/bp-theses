@@ -17,7 +17,7 @@ class Classifier:
         print(self.ioc_match)
 
     def init_counter(self):
-        for family in set(val for val in self.cnt.values()):
+        for family in set(val for val in self.cnt.keys()):
             self.match_cnt[family] = 0
 
     def _extract_http(self, json_obj):
