@@ -11,8 +11,7 @@ class Classifier:
         self.cnt = ioc_cnt
 
     def score(self):
-        families = set(val for val in self.iocs.values())
-        for family in families:
+        for family in set(val for val in self.cnt.keys()):
             print(f"The score for family {family} is {round(self.match_cnt[family]/self.cnt[family] * 100, 2)}%. With {self.match_cnt[family]} successful matches.")
         print(self.ioc_match)
 
@@ -94,11 +93,9 @@ class Classifier:
 
                 if ioc:
                     self.ioc_match[ioc] = self.iocs[ioc]
-                    #self.match_cnt[self.iocs[ioc]] += 1
                     self._increment(ioc)
                     print(f"Warning possible malicious activity was found. IOC: {ioc}")
                 elif ip_match:
                     self.ioc_match[ip_match] = self.iocs[ip_match]
-                    #self.match_cnt[self.iocs[ip_match]] += 1
                     self._increment(ip_match)
                     print(f"Warning possible malicious activity was found. IP: {ip_match}")

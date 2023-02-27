@@ -25,15 +25,12 @@ class Extractor:
         for key, vals in iocs.items():
             if not ioc_type or key == ioc_type:
                 for val in vals:
-                   # self.ioc_map[val] = family
-                   # cnt += 1
                     if val not in self.ioc_map:
                         self.ioc_map[val] = []
                         self.ioc_map[val].append(family)
                         cnt += 1
                     elif family not in self.ioc_map[val]:
                         self.ioc_map[val].append(family)
-                        #print(self.ioc_map[val], " ", val)
                         cnt += 1
         return cnt
 
@@ -52,10 +49,12 @@ class Extractor:
                             cnt = self._inser(iocs, family, cnt, ioc_type)
                             self.ioc_cnt[family] = cnt
 
+    # Print overall statistics about extracted IOC's for each family
     def ioc_print(self):
         for key, val in self.ioc_cnt.items():
             print(f"Family {key} - {val} indicators")
 
+    # Print IOC's for specific sample 
     def ioc_spec_print(self, sample, key_yes):
         i = 0
         for key, val in self.ioc_map.items():
@@ -65,6 +64,7 @@ class Extractor:
             if key_yes:
                 print(key)
 
+    # Print specific type of the IOC's eg. only IP's or domains, etc.
     def only_iocs(self):
         families = []
         for key, val in self.ioc_map.items():
@@ -73,10 +73,9 @@ class Extractor:
                 families.append(val)
             print(key)
 
+    # Print IOC's for specific family
     def family_iocs(self, family):
         for key, vals in self.ioc_map.items():
-           # if vals == family:
-           #     print(key)
             for val in vals:
                 if val == family:
                     print(key)

@@ -45,25 +45,24 @@ def handler(signum, frame):
     sys.exit(0)
 
 # MAIN
-args, cmds = argparse()
-extractor = Extractor()
-extractor.extract(args, args['-t'][1]) # Extract ioc's from the report files
-classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
-signal.signal(signal.SIGINT, handler)
+if __name__ == "__main__":
+    args, cmds = argparse()
+    extractor = Extractor()
+    extractor.extract(args, args['-t'][1]) # Extract ioc's from the report files
+    classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt)
+    signal.signal(signal.SIGINT, handler)
 
-classifier.init_counter() # Init counters for each family
+    classifier.init_counter() # Init counters for each family
 
-# TODO score board. If in common.txt than 1 point, if in infected than 5 points, other 2 points
-while True and cmds['--live']:
-    # classifier.classify(os.path.join(suricata_log, "eve-nsm.json"))
-    # classifier.classify(os.path.join(suricata_log, "eve-flow.json"))
-    classifier.live_capture(suricata_log)
+    # TODO score board. If in common.txt than 1 point, if in infected than 5 points, other 2 points
+    while True and cmds['--live']:
+        classifier.live_capture(suricata_log)
 
-# Print statistics about families and found IOC's
-if args['-m'][0]:
-    extractor.ioc_spec_print(args['-m'][1], True)
-elif args['-t'][0]:
-    extractor.only_iocs()
-else:
-    extractor.ioc_print()
-    #extractor.family_iocs("smokeloader")
+    # Print statistics about families and found IOC's
+    if args['-m'][0]:
+        extractor.ioc_spec_print(args['-m'][1], True)
+    elif args['-t'][0]:
+        extractor.only_iocs()
+    else:
+        extractor.ioc_print()
+        #extractor.family_iocs("smokeloader")
