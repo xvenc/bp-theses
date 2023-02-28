@@ -5,6 +5,7 @@ class Classifier:
 
     ioc_match = {}
     match_cnt = {}
+    log_cnt = 0
 
     def __init__(self, ioc_map, ioc_cnt):
         self.iocs = ioc_map
@@ -13,7 +14,8 @@ class Classifier:
     def score(self):
         for family in set(val for val in self.cnt.keys()):
             print(f"The score for family {family} is {round(self.match_cnt[family]/self.cnt[family] * 100, 2)}%. With {self.match_cnt[family]} successful matches.")
-        #print(self.ioc_match)
+        print(f"During live capture was proccessed {self.log_cnt} entries.")
+        print(self.ioc_match)
 
     def init_counter(self):
         for family in set(val for val in self.cnt.keys()):
@@ -91,6 +93,7 @@ class Classifier:
         for record in self._tail(open(file, 'r')):
             try:
                 json_obj = json.loads(record)
+                self.log_cnt += 1
             except ValueError:
                 # Possible corrupt json entry, so skip to the next one
                 continue
