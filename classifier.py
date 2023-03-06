@@ -61,6 +61,7 @@ class Classifier:
     def classify(self, file):
         for record in open(file, 'r'):
             json_obj = json.loads(record)
+            self.log_cnt += 1
             ioc = self._extract(json_obj)
             ip_match = self._extract_ip(json_obj)
             if (ioc in self.iocs and ioc not in self.ioc_match) or \

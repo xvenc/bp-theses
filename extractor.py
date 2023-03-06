@@ -59,7 +59,7 @@ class Extractor:
         i = 0
         for key, val in self.ioc_map.items():
             if i == 0:
-                print(f"IOC's for family {val} and sample {sample} - {self.ioc_cnt[val]} IOC's.")
+                print(f"IOC's for family {val[0]} and sample {sample} - {self.ioc_cnt[val[0]]} IOC's.")
                 i += 1
             if key_yes:
                 print(key)
