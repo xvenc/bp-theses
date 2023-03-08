@@ -2,7 +2,7 @@ from requests import Session
 from os import path, walk
 from pathlib import Path
 from src.general import bcolors, check_dir
-from src.report import create_report, create_file, check_downloaded
+from src.report import create_report, create_report_file, check_downloaded
 import time
 import csv
 
@@ -26,14 +26,24 @@ class Downloader:
                     wf.write(data)
         return True
 
-    def _report(self,sample_id, report_dir, report_file):
+    # Function to download overview report of the analysis
+    def _get_overview_report(self, sample_id, report_dir, report_file):
         try:
             report = self.client.overview_report(sample_id)
         except:
-            print(bcolors.FAIL + "Couldnt download report." + bcolors.ENDC)
+            print(bcolors.FAIL + "Couldnt download overview report." + bcolors.ENDC)
             return
 
         create_report(report, report_file, report_dir)
+
+    def _get_network_report(self, sample_id, report_dir, report_file):
+        try:
+            # Get task report from behavioral1 analysis(windows7 analysis)
+            net_report = self.client.task_report(sample_id, 'behavioral1')
+        except:
+            print(bcolors.FAIL + "Couldn't download task report." + bcolors.ENDC)
+            return
+        create_report(net_report, report_file, report_dir)
 
     def download_from_report(self, data, outpud_dir, filename):
         try:
@@ -66,7 +76,7 @@ class Downloader:
                     "{0}".format(filename) + bcolors.ENDC)
 
     # function to wait for the analysis to be done and then download the pcap
-    def _download_wait(self, sample_id, filename, pcap_dir, subdir, report_dir):
+    def _download_wait(self, sample_id, filename, pcap_dir, family, report_dir, network_dir):
         while True:
             try:
                 status = self.client.sample_by_id(sample_id)['status']
@@ -76,20 +86,22 @@ class Downloader:
 
             # check if analysis finished
             if  status == 'reported':
-                self.download_sample(sample_id, 'behavioral1', path.join(pcap_dir, subdir),
+                # Download pcap files from both analysis
+                self.download_sample(sample_id, 'behavioral1', path.join(pcap_dir, family),
                                      filename, "1")
-                self.download_sample(sample_id, 'behavioral2', path.join(pcap_dir, subdir),
+                self.download_sample(sample_id, 'behavioral2', path.join(pcap_dir, family),
                                      filename, "2")
 
-                report_f = create_file(path.splitext(filename)[0])
-                self._report(sample_id, report_dir+subdir, report_f)
+                report_f = create_report_file(path.splitext(filename)[0])
+                self._get_overview_report(sample_id, path.join(report_dir, family), report_f)
+                self._get_network_report(sample_id, path.join(network_dir, family), report_f)
                 break;
 
             else:
                 time.sleep(60)
 
     def download_samples_for_directory(self, directory, family, family_dict, 
-                                            report_dir, log_dir, pcap_dir):
+                                            report_dir, log_dir, pcap_dir, network_dir):
         malware_dir = check_dir(directory)
         for root, dirs, files in walk(path.join(malware_dir, family)):
             # check if directory contain files, not only other directories
@@ -105,4 +117,4 @@ class Downloader:
                     # checking if it is a file and wasnt already downloaded
                     if path.isfile(f) and not check_downloaded(path.join(report_dir, family), f):
                         self._download_wait(row['Sample_id'], row['Filename'],
-                                                    pcap_dir, family, report_dir)
+                                                    pcap_dir, family, report_dir, network_dir)
