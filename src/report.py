@@ -1,14 +1,7 @@
 import json
 from os import path, listdir
-from pathlib import Path
 
-def create_folder(directory):
-    if directory[-1] != '/':
-            directory += '/'
-    if not path.isdir(directory):
-        Path(directory).mkdir(parents=True, exist_ok=True)
-
-def create_file(directory):
+def create_report_file(directory):
     log_f = directory.replace('/','_')
     if log_f.endswith('_'):
         log_f = log_f[:-1] + ".json"
