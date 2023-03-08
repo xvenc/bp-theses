@@ -1,4 +1,4 @@
-from src.general import bcolors
+from src.general import bcolors, create_folder
 from src.report import *
 from os import walk, path
 from src.csv_writer import check_recorded, create_file_name, write_header, log
@@ -15,7 +15,7 @@ class Uploader:
         return directory
 
     # function to submit all files from a directory
-    def submit_directory(self, malware_dir, client, family, report_dir):
+    def submit_directory(self, malware_dir, client, family, report_dir, network_dir):
         malware_dir = self._check_dir(malware_dir)
         create_folder(self.logs)
 
@@ -32,6 +32,8 @@ class Uploader:
 
             # create folder for reports
             create_folder(path.join(report_dir, family))
+            # create folder for network reports
+            create_folder(path.join(network_dir, family))
 
             # iterate trough files in malware directory
             for file in files:
