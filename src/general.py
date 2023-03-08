@@ -1,5 +1,9 @@
 from pathlib import Path
+from os import listdir, path
+import getopt
+import sys
 
+# Colors for preattier output
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -11,6 +15,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+# Simple help
 def help():
     print("Usage: python3 triage_client [COMMAND] [OPTION]\n")
     print("Command:")
@@ -44,8 +49,69 @@ def check_dir(directory):
     return directory
 
 # Create folder structure
-def create_folders(out_dir, malware, pcaps, reports):
-    Path(out_dir+malware).mkdir(parents=True, exist_ok=True)
-    Path(out_dir+pcaps).mkdir(parents=True, exist_ok=True)
-    Path(out_dir+reports).mkdir(parents=True, exist_ok=True)
+def create_folders(out_dir, malware, pcaps, reports, network):
+    Path(path.join(out_dir, malware)).mkdir(parents=True, exist_ok=True)
+    Path(path.join(out_dir,pcaps)).mkdir(parents=True, exist_ok=True)
+    Path(path.join(out_dir,reports)).mkdir(parents=True, exist_ok=True)
+    Path(path.join(out_dir,network)).mkdir(parents=True, exist_ok=True)
+
+# Create one directory with specified name
+def create_folder(directory):
+    if directory[-1] != '/':
+            directory += '/'
+    if not path.isdir(directory):
+        Path(directory).mkdir(parents=True, exist_ok=True)
+
+# parse command line arguments
+def arg_parse():
+    command = {'--submit' : False, '--download' : False, '--now' : False, 
+                '--get' : False, '--all' : False}
+    option = {'-d' : [False,""], '-f' : [False,""], '-p' : [False, ""],
+              '-o': [False, ""], '-m' : [False,""], '-l' : [False, ""]}
+    try:
+        options, args = getopt.getopt(sys.argv[1:], "d:f:o:m:l:", ["help", 
+                                "submit", "download", "now", "get", "all"])
+    except:
+        help()
+        sys.exit(1)
+
+    # all arguments are correct so go through them
+    for opt, arg in options:
+        if opt == '--help':
+            help()
+            exit(0)
+        elif opt in option:
+            option[opt][0] = True
+            option[opt][1] = arg
+        elif opt in command:
+            command[opt] = True
+
+    if command['--submit'] and command['--download']:
+        sys.exit(1)
+
+    return command,option
+
+# read lines from malware family file
+def read_lines(file):
+    data = list()
+    if file != None:
+        try:
+            f = open(file,"r")
+            data = f.readlines()
+        except:
+            data.append(file)
+            print("Download one family " + file)
+    else:
+        print(bcolors.FAIL + "Family not specified" + bcolors.ENDC)
+        exit(1)
+    data = [l.strip() for l in data]
+    return data
+
+# Extract family names from log files
+def get_families_from_logs(log_dir):
+    family_dict = {}
+    for filename in listdir(log_dir):
+        family = path.splitext(filename)[0].split('_')[-1] 
+        family_dict[family] = filename
+    return family_dict
 
