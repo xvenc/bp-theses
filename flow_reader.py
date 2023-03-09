@@ -27,6 +27,7 @@ class FlowReader:
         # The key to the dict is composed of 5 features
         # Src and dst IP, src and dst port and protocol
         self.flows = dict() # Dictionary for flows and it's features
+        self.domains = list() # List of 500 regular domains
 
     def _family_name(self, root, out_dir):
         return root.replace(out_dir, "")
@@ -47,14 +48,14 @@ class FlowReader:
             index = self._create_tuple(flow)            
             if not self._create_flow(index, flow, label):
                 # Flow alredy exist so increase the numbers
-                self._add_flow()
+                self._increase_flow(self.flows[index], flow, label)
             
     def _get_duration(self, flow):
         if 'last_seen' in flow or 'first_seen' in flow:
             return flow['last_seen'] - flow['first_seen']
         return -1
 
-    # TODO ukladat domeny
+    
     def _get_app_protocol(self, flow):
         if 'protocols' not in flow:
             return ""
@@ -76,8 +77,23 @@ class FlowReader:
             elif protocols[1] == "https":
                 return "https"
 
-    def _add_flow(self):
-        pass
+    # Get domain name from flow and remove potentional www. in the beggining
+    def _get_domain(self, flow):
+        if 'domain' in flow:
+            return flow['domain'].replace('www.', '')
+        
+        return ""
+
+    # Flow is already in the cache so increase all the features
+    def _increase_flow(self, cache_flow, new_flow, label):
+        duration = self._get_duration(new_flow)
+        if duration != -1:
+            cache_flow.duration += duration
+        cache_flow.rx_bytes += new_flow['rx_bytes']
+        cache_flow.rx_packets += new_flow['rx_packets']
+        cache_flow.tx_bytes += new_flow['tx_bytes']
+        cache_flow.tx_packets += new_flow['tx_packets']
+        
 
     def _create_flow(self, index, flow, label):
         if index in self.flows.keys():
@@ -85,10 +101,11 @@ class FlowReader:
 
         duration = self._get_duration(flow) 
         app_proto = self._get_app_protocol(flow)
-        if app_proto == "dns":
-            self.flows[index] = Flow(index[0], index[1], index[2], app_proto, duration, flow, "Normal")
-        else:
-            self.flows[index] = Flow(index[0], index[1], index[2], app_proto, duration, flow, label)
+        domain = self._get_domain(flow)
+        if domain in self.domains or app_proto == 'dns':
+            label = "Normal"
+
+        self.flows[index] = Flow(index[0], index[1], index[2], app_proto, duration, flow, label)
 
         return True
 
@@ -103,12 +120,26 @@ class FlowReader:
                     if report['network']:
                         #print(root+"/"+filename)
                         self._extract_flow(report['network'], label)
+    
+    def read_common_domains(self, file):
+        with open(file, "r") as f:
+            data = f.readlines()
+            self.domains = [l.strip() for l in data]
+            # Remove potentional duplicants
+            self.domains = list(dict.fromkeys(self.domains))
 
     def print_flows(self):
         for key, items in self.flows.items():
             print(key, "\t", items)
 
+    
+class SuricataParser:
+
+    def __init__(self):
+        self.flows = dict()
+
 if __name__ == "__main__":
     flow_reader = FlowReader()
+    flow_reader.read_common_domains("common.txt")
     flow_reader.proccess_flows("out/network", "malware")
     #flow_reader.print_flows() 
