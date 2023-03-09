@@ -1,19 +1,21 @@
 import json
 from os import walk, path
+from datetime import datetime
 
 class Flow:
 
-    def __init__(self, src_ip, dst_ip, dst_p, app_prot, duration, flow, label):
+    def __init__(self, src_ip, dst_ip, dst_p, proto, app_prot, duration, rx_bytes,
+                rx_packets, tx_bytes, tx_packets, label):
         self.src_ip = src_ip
         self.dst_ip = dst_ip
-        self.dst_port = dst_p
-        self.proto = flow['proto'] 
-        self.app_proto = app_prot
-        self.duration = duration
-        self.rx_bytes = flow['rx_bytes'] # Received bytes (without ethernet header)
-        self.rx_packets = flow['rx_packets']
-        self.tx_bytes = flow['tx_bytes'] # Transmitted bytes (without ethernet header)
-        self.tx_packets = flow['tx_bytes']
+        self.dst_port = int(dst_p)
+        self.proto = str(proto)
+        self.app_proto = str(app_prot)
+        self.duration = int(duration)
+        self.rx_bytes = int(rx_bytes) # Received bytes (without ethernet header)
+        self.rx_packets = int(rx_packets)
+        self.tx_bytes = int(tx_bytes) # Transmitted bytes (without ethernet header)
+        self.tx_packets = int(tx_packets)
         self.label = label # Normal or malicious
         # mby add domain but discuss this
         self.domain = "" 
@@ -58,7 +60,7 @@ class FlowReader:
     
     def _get_app_protocol(self, flow):
         if 'protocols' not in flow:
-            return ""
+            return "-"
         else:
             protocols = flow['protocols']
         if len(protocols) == 1:
@@ -76,6 +78,9 @@ class FlowReader:
                 return "http"
             elif protocols[1] == "https":
                 return "https"
+        
+
+        return "-"
 
     # Get domain name from flow and remove potentional www. in the beggining
     def _get_domain(self, flow):
@@ -105,7 +110,9 @@ class FlowReader:
         if domain in self.domains or app_proto == 'dns':
             label = "Normal"
 
-        self.flows[index] = Flow(index[0], index[1], index[2], app_proto, duration, flow, label)
+        self.flows[index] = Flow(index[0], index[1], index[2], flow['proto'],
+                app_proto, duration, flow['rx_bytes'], flow['rx_packets'], 
+                flow['tx_bytes'], flow['tx_packets'], label)
 
         return True
 
@@ -138,8 +145,69 @@ class SuricataParser:
     def __init__(self):
         self.flows = dict()
 
+    def _create_tuple(self, flow):
+        # Src IP, Dst IP, Dst port, protocol
+        return (flow['src_ip'], flow['dest_ip'], flow['dest_port'], flow['proto'])
+
+    def _extract_time(self, timestamp):
+        return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
+        
+    def _get_duration(self, start, end):
+        start = self._extract_time(start)
+        end = self._extract_time(end)
+        start = int(str(start.minute * 60 + start.second) + str(start.microsecond)[:-3])
+        end = int(str(end.minute * 60 + end.second) + str(end.microsecond)[:-3]) 
+        return end - start
+
+    def _create_flow_record(self, flow, index):
+        if index in self.flows.keys():
+            return False
+        
+        duration = self._get_duration(flow['flow']['start'], flow['flow']['end'])
+        app_proto = "-"
+        if 'app_proto' in flow:
+            if flow['app_proto'] != 'failed':
+                app_proto = flow['app_proto']
+
+        self.flows[index] = Flow(index[0], index[1], index[2], flow['proto'],
+                app_proto, duration, flow['flow']['bytes_toclient'], 
+                flow['flow']['pkts_toclient'], flow['flow']['bytes_toserver'],
+                flow['flow']['pkts_toserver'], "Normal")
+
+    def _update_flow(self, new_flow, index):
+        cache_flow = self.flows[index]
+        cache_flow.duration += self._get_duration(new_flow['start'], new_flow['end'])
+        cache_flow.rx_bytes += new_flow['bytes_toclient']
+        cache_flow.rx_packets += new_flow['pkts_toclient']
+        cache_flow.tx_bytes += new_flow['bytes_toserver']
+        cache_flow.tx_packets += new_flow['pkts_toserver']
+        
+
+    def _extract_features(self, flow):
+        index = self._create_tuple(flow)
+        if not self._create_flow_record(flow, index):
+            # Flow is already in the cache
+            self._update_flow(flow['flow'], index)
+
+
+    def proccess_flows(self, file, label = "Normal"):
+        for record in open(file, 'r'):
+            flow = json.loads(record)
+            self._extract_features(flow)
+
+    def print_flows(self):
+        print("\t\t\tKey\t\t\t app_proto duration rx_b rx_p tx_b tx_p label")
+        for key, items in self.flows.items():
+            print(key, "\t", items)
+
+
+
+
 if __name__ == "__main__":
     flow_reader = FlowReader()
+    suricata = SuricataParser()
     flow_reader.read_common_domains("common.txt")
     flow_reader.proccess_flows("out/network", "malware")
+    suricata.proccess_flows('test_tmp/eve-flow.json')
     #flow_reader.print_flows() 
+    suricata.print_flows()
