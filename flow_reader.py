@@ -1,11 +1,12 @@
 import json
 from os import walk, path
 from datetime import datetime
+import csv
 
 class Flow:
 
     def __init__(self, src_ip, dst_ip, dst_p, proto, app_prot, duration, rx_bytes,
-                rx_packets, tx_bytes, tx_packets, label):
+                rx_packets, tx_bytes, tx_packets, label, family):
         self.src_ip = src_ip
         self.dst_ip = dst_ip
         self.dst_port = int(dst_p)
@@ -18,10 +19,11 @@ class Flow:
         self.tx_packets = int(tx_packets)
         self.label = label # Normal or malicious
         # mby add domain but discuss this
-        self.domain = "" 
+        #self.domain = "" 
+        self.family = family 
 
     def __str__(self) -> str:
-        return self.app_proto + " " + str(self.duration) + " " + str(self.rx_bytes) + " " +  str(self.rx_packets) + " " + str(self.tx_bytes) + " " + str(self.tx_packets) + " " + self.label
+        return self.app_proto + " " + str(self.duration) + " " + str(self.rx_bytes) + " " +  str(self.rx_packets) + " " + str(self.tx_bytes) + " " + str(self.tx_packets) + " " + self.label + " " + self.family
 
 class FlowReader:
 
@@ -42,15 +44,15 @@ class FlowReader:
         #return (flow['dst'], dst_p ,flow['proto'])
         return (flow['src'], flow['dst'], dst_p ,flow['proto'])
 
-    def _extract_flow(self, report, label):
+    def _extract_flow(self, report, label, family):
         if 'flows' not in report:
             return
 
         for flow in report['flows']:
             index = self._create_tuple(flow)            
-            if not self._create_flow(index, flow, label):
+            if not self._create_flow(index, flow, label, family):
                 # Flow alredy exist so increase the numbers
-                self._increase_flow(self.flows[index], flow, label)
+                self._increase_flow(self.flows[index], flow)
             
     def _get_duration(self, flow):
         if 'last_seen' in flow or 'first_seen' in flow:
@@ -79,7 +81,6 @@ class FlowReader:
             elif protocols[1] == "https":
                 return "https"
         
-
         return "-"
 
     # Get domain name from flow and remove potentional www. in the beggining
@@ -90,7 +91,7 @@ class FlowReader:
         return ""
 
     # Flow is already in the cache so increase all the features
-    def _increase_flow(self, cache_flow, new_flow, label):
+    def _increase_flow(self, cache_flow, new_flow):
         duration = self._get_duration(new_flow)
         if duration != -1:
             cache_flow.duration += duration
@@ -100,7 +101,7 @@ class FlowReader:
         cache_flow.tx_packets += new_flow['tx_packets']
         
 
-    def _create_flow(self, index, flow, label):
+    def _create_flow(self, index, flow, label, family):
         if index in self.flows.keys():
             return False
 
@@ -109,10 +110,13 @@ class FlowReader:
         domain = self._get_domain(flow)
         if domain in self.domains or app_proto == 'dns':
             label = "Normal"
-
+        
+        if label == "Normal":
+            family = "-"
+        
         self.flows[index] = Flow(index[0], index[1], index[2], flow['proto'],
                 app_proto, duration, flow['rx_bytes'], flow['rx_packets'], 
-                flow['tx_bytes'], flow['tx_packets'], label)
+                flow['tx_bytes'], flow['tx_packets'], label, family)
 
         return True
 
@@ -126,8 +130,39 @@ class FlowReader:
                     report = json.load(j_file)
                     if report['network']:
                         #print(root+"/"+filename)
-                        self._extract_flow(report['network'], label)
-    
+                        self._extract_flow(report['network'], label, family)
+
+    def create_row(self, key, items):
+        row = []
+        row.append(hash(key))
+        row.append(items.src_ip)
+        row.append(items.dst_ip)
+        row.append(items.dst_port)
+        row.append(items.proto)
+        row.append(items.app_proto)
+        row.append(items.duration)
+        row.append(items.rx_bytes)
+        row.append(items.rx_packets)
+        row.append(items.tx_packets)
+        row.append(items.tx_bytes)
+        row.append(items.rx_bytes + items.tx_bytes)
+        row.append(items.rx_packets + items.tx_packets)
+        row.append(items.label)
+        return row
+
+    def write_to_file(self, path):
+        header = ['Flow id', 'Src IP', 'Dst IP', 'Dst port', 'Protocol', 
+        'Application protocol', 'Duration', 'Received bytes', 'Received packets',
+        'Transmitted bytes', 'Transmitted packets', 'Total bytes', 'Total packets' 
+        ,'label']
+        with open(path, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            # Write header
+            writer.writerow(header)
+            for key, items in self.flows.items():
+                row = self.create_row(key, items)
+                writer.writerow(row)
+
     def read_common_domains(self, file):
         with open(file, "r") as f:
             data = f.readlines()
@@ -172,7 +207,7 @@ class SuricataParser:
         self.flows[index] = Flow(index[0], index[1], index[2], flow['proto'],
                 app_proto, duration, flow['flow']['bytes_toclient'], 
                 flow['flow']['pkts_toclient'], flow['flow']['bytes_toserver'],
-                flow['flow']['pkts_toserver'], "Normal")
+                flow['flow']['pkts_toserver'], "Normal", "-")
 
     def _update_flow(self, new_flow, index):
         cache_flow = self.flows[index]
@@ -201,13 +236,12 @@ class SuricataParser:
             print(key, "\t", items)
 
 
-
-
 if __name__ == "__main__":
     flow_reader = FlowReader()
     suricata = SuricataParser()
     flow_reader.read_common_domains("common.txt")
-    flow_reader.proccess_flows("out/network", "malware")
+    flow_reader.proccess_flows("out/network/", "malware")
     suricata.proccess_flows('test_tmp/eve-flow.json')
-    #flow_reader.print_flows() 
-    suricata.print_flows()
+    flow_reader.write_to_file('dataset.csv')
+    #flow_reader.print_flows()
+    #suricata.print_flows()
