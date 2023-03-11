@@ -148,13 +148,14 @@ class FlowReader:
         row.append(items.rx_bytes + items.tx_bytes)
         row.append(items.rx_packets + items.tx_packets)
         row.append(items.label)
+        row.append(items.family)
         return row
 
     def write_to_file(self, path):
         header = ['Flow id', 'Src IP', 'Dst IP', 'Dst port', 'Protocol', 
         'Application protocol', 'Duration', 'Received bytes', 'Received packets',
         'Transmitted bytes', 'Transmitted packets', 'Total bytes', 'Total packets' 
-        ,'label']
+        ,'label', 'family']
         with open(path, 'w') as csv_file:
             writer = csv.writer(csv_file)
             # Write header
@@ -235,6 +236,37 @@ class SuricataParser:
         for key, items in self.flows.items():
             print(key, "\t", items)
 
+    def create_row(self, key, items):
+        row = []
+        row.append(hash(key))
+        row.append(items.src_ip)
+        row.append(items.dst_ip)
+        row.append(items.dst_port)
+        row.append(items.proto)
+        row.append(items.app_proto)
+        row.append(items.duration)
+        row.append(items.rx_bytes)
+        row.append(items.rx_packets)
+        row.append(items.tx_packets)
+        row.append(items.tx_bytes)
+        row.append(items.rx_bytes + items.tx_bytes)
+        row.append(items.rx_packets + items.tx_packets)
+        row.append(items.label)
+        row.append(items.family)
+        return row
+
+    def write_to_file(self, path):
+        header = ['Flow id', 'Src IP', 'Dst IP', 'Dst port', 'Protocol', 
+        'Application protocol', 'Duration', 'Received bytes', 'Received packets',
+        'Transmitted bytes', 'Transmitted packets', 'Total bytes', 'Total packets' 
+        ,'label', 'family']
+        with open(path, 'w') as csv_file:
+            writer = csv.writer(csv_file)
+            # Write header
+            writer.writerow(header)
+            for key, items in self.flows.items():
+                row = self.create_row(key, items)
+                writer.writerow(row)
 
 if __name__ == "__main__":
     flow_reader = FlowReader()
@@ -243,5 +275,6 @@ if __name__ == "__main__":
     flow_reader.proccess_flows("out/network/", "malware")
     suricata.proccess_flows('test_tmp/eve-flow.json')
     flow_reader.write_to_file('dataset.csv')
+    suricata.write_to_file('dataset2.csv')
     #flow_reader.print_flows()
     #suricata.print_flows()
