@@ -191,9 +191,13 @@ class SuricataParser:
     def _get_duration(self, start, end):
         start = self._extract_time(start)
         end = self._extract_time(end)
-        start = int(str(start.minute * 60 + start.second) + str(start.microsecond)[:-3])
-        end = int(str(end.minute * 60 + end.second) + str(end.microsecond)[:-3]) 
-        return end - start
+        duration = str(end-start)
+        if duration == "0:00:00":
+            return 0
+        sec = str(int(duration.split(":")[1]) * 60 + int(duration.split(':')[2].split('.')[0]))
+        milisec = duration.split('.')[1][:3]
+        time = int(sec + milisec)
+        return time 
 
     def _create_flow_record(self, flow, index):
         if index in self.flows.keys():
@@ -276,5 +280,3 @@ if __name__ == "__main__":
     suricata.proccess_flows('test_tmp/eve-flow.json')
     flow_reader.write_to_file('dataset.csv')
     suricata.write_to_file('dataset2.csv')
-    #flow_reader.print_flows()
-    #suricata.print_flows()
