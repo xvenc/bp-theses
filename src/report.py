@@ -1,12 +1,12 @@
 import json
 from os import path, listdir
 
-def create_report_file(directory):
+def create_report_file(directory, appendix = ""):
     log_f = directory.replace('/','_')
     if log_f.endswith('_'):
-        log_f = log_f[:-1] + ".json"
+        log_f = log_f[:-1] + appendix + ".json"
     else:
-        log_f = log_f + ".json"
+        log_f = log_f + appendix + ".json"
     return log_f
 
 def create_report(report, log_f, log_dir):

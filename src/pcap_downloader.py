@@ -16,7 +16,11 @@ class Downloader:
     def _download_pcap(self, sample_id, taksk_id, output_dir, filename, num):
         s = Session()
         headers = {'Authorization': 'Bearer {0}'.format(self.token)}
-        data = s.get(url= self.url + f"{sample_id}/{taksk_id}/dump.pcap",headers=headers).content
+        try:
+            data = s.get(url= self.url + f"{sample_id}/{taksk_id}/dump.pcap",headers=headers).content
+        except:
+            print(bcolors.FAIL + "Couldnt download pcap." + bcolors.ENDC)
+            return
         if output_dir[-1] != '/':
             output_dir += '/'
         if not path.isdir(output_dir):
@@ -36,10 +40,10 @@ class Downloader:
 
         create_report(report, report_file, report_dir)
 
-    def _get_network_report(self, sample_id, report_dir, report_file):
+    def _get_network_report(self, sample_id, report_dir, report_file, report_type):
         try:
             # Get task report from behavioral1 analysis(windows7 analysis)
-            net_report = self.client.task_report(sample_id, 'behavioral1')
+            net_report = self.client.task_report(sample_id, report_type)
         except:
             print(bcolors.FAIL + "Couldn't download task report." + bcolors.ENDC)
             return
@@ -92,9 +96,14 @@ class Downloader:
                 self.download_sample(sample_id, 'behavioral2', path.join(pcap_dir, family),
                                      filename, "2")
 
-                report_f = create_report_file(path.splitext(filename)[0])
-                self._get_overview_report(sample_id, path.join(report_dir, family), report_f)
-                self._get_network_report(sample_id, path.join(network_dir, family), report_f)
+                self._get_overview_report(sample_id, path.join(report_dir, family), 
+                create_report_file(path.splitext(filename)[0], ""))
+
+                self._get_network_report(sample_id, path.join(network_dir, family), 
+                create_report_file(path.splitext(filename)[0], "_1"), "behavioral1")
+
+                self._get_network_report(sample_id, path.join(network_dir, family), 
+                create_report_file(path.splitext(filename)[0], "_2"), "behavioral2")
                 break;
 
             else:
