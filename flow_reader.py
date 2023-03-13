@@ -10,8 +10,8 @@ class Flow:
         self.src_ip = src_ip
         self.dst_ip = dst_ip
         self.dst_port = int(dst_p)
-        self.proto = str(proto)
-        self.app_proto = str(app_prot)
+        self.proto = str(proto).lower()
+        self.app_proto = str(app_prot).lower()
         self.duration = int(duration)
         self.rx_bytes = int(rx_bytes) # Received bytes (without ethernet header)
         self.rx_packets = int(rx_packets)
@@ -233,7 +233,8 @@ class SuricataParser:
     def proccess_flows(self, file, label = "Normal"):
         for record in open(file, 'r'):
             flow = json.loads(record)
-            self._extract_features(flow)
+            if flow['proto'] in ['UDP', 'TCP']:
+                self._extract_features(flow)
 
     def print_flows(self):
         print("\t\t\tKey\t\t\t app_proto duration rx_b rx_p tx_b tx_p label")
