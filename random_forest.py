@@ -2,7 +2,8 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_predict
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import GridSearchCV
 
 def evaluate_results(model, test_features, test_labels):
 
@@ -25,81 +26,117 @@ def evaluate_results(model, test_features, test_labels):
 
     print("RESULTS")
     print("----------------------------------------------")
-    print("false positive:", false_positive)
-    print("true positive:", true_positive)
-    print("false negative:", false_negative)
-    print("true negative:", true_negative)
+    print("False positive:", false_positive)
+    print("True positive:", true_positive)
+    print("False negative:", false_negative)
+    print("True negative:", true_negative)
     print("----------------------------------------------")
-    print("library detection:", model.score(test_features, test_labels))
-    print("good detect:", (true_negative + true_positive), "Procentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
-    print("bad detect:", (false_negative + false_positive), "Procentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
-    print("All connection:", len(test_features))
+    print("Overall score:", model.score(test_features, test_labels))
+    print("Good detect:", (true_negative + true_positive), "Procentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
+    print("Bad detect:", (false_negative + false_positive), "Procentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
+    print("Test data length:", len(test_features))
 
-def crossvalidation(model, data_train, labels):
-    score = cross_val_predict(model, data_train, labels, cv=5) 
-    print("Crossvalidation")
-    print(np.mean(score))
+def crossvalidation(model, data_train, labels, cv):
+    score = cross_val_score(model, data_train, labels, cv=cv, scoring='accuracy', n_jobs=-1, error_score='raise') 
+    print(f"Crossvalidation with {cv} folds has score ", np.mean(score))
 
-# Load normal and malicious datasets 
-df_normal = pd.read_csv('dataset.csv')
-df_malware = pd.read_csv('dataset2.csv')
-# Append them together
-df = df_normal.append(df_malware)
+def load_dataset(path1, path2):
+    # Load normal and malicious datasets 
+    df_normal = pd.read_csv(path1)
+    df_malware = pd.read_csv(path2)
+    # Append them together
+    df = df_normal.append(df_malware)
+    return df
 
-# Data preproccessing
+def data_preproccessing(df : pd.DataFrame):
+    # Specify which columns to use for our model
+    cols = ['Flow id', 'Duration', 'Received bytes','Received packets'
+    ,'Transmitted bytes', 'Transmitted packets', 'Protocol', 
+    'Application protocol', 'Total bytes', 'Total packets', 'label']
 
-# Specify which columns to use for our model
-cols = ['Flow id', 'Duration', 'Received bytes','Received packets' ,'Transmitted bytes', 'Transmitted packets', 'Protocol', 'Application protocol', 'Total bytes', 'Total packets', 'label']
-df = df[cols]
-# Rename values in label column
-# Malware = 1
-# Normal = 0
-df.loc[df['label'] == 'Normal', 'label'] = 0
-df.loc[df['label'] == 'malware', 'label'] = 1
-df['label'] = df['label'].astype('int64')
-# Remove unwanted application protocol
-df = df[df['Application protocol'] != 'ntp']
+    df = df[cols]
+    # Rename values in label column
+    # Malware = 1
+    # Normal = 0
+    df.loc[df['label'] == 'normal', 'label'] = 0
+    df.loc[df['label'] == 'malware', 'label'] = 1
+    df['label'] = df['label'].astype('int64')
+    #df['Port'] = df['Dst port']
+    # Remove unwanted application protocol
+    df = df[df['Application protocol'] != 'ntp']
 
-# TODO normalization
-# Find the biggest number in the column and divide the rest of the
-# values with it
+    # Find the biggest number in the column and divide the rest of the
+    # values with it
+    norm_cols = ['Duration', 'Received bytes', 'Received packets',
+    'Transmitted bytes', 'Transmitted packets', 'Total bytes',
+    'Total packets']
+    max_vals = df.max()
 
-max_values = df.max()
+    for col in norm_cols:
+        df[col] /= max_vals[col]
 
-# Performe one-hot encoding on categorical features
-df = pd.get_dummies(df)
+    # Performe one-hot encoding on categorical features
+    df = pd.get_dummies(df)
 
-# Extract labels which are the values we want to predict
-# And remove them from the dataframe
-labels = np.array(df['label'])
-df = df.drop('label', axis=1)
+    return df
 
-# Save feature names for later use
-names = list(df.columns)
+def split_data(df : pd.DataFrame):
+    # Extract labels which are the values we want to predict
+    # And remove them from the dataframe
+    labels = np.array(df['label'])
+    df = df.drop('label', axis=1)
 
-# Finally convert to np array
-data = np.array(df)
+    # Save feature names for later use
+    names = list(df.columns)
 
-# Spliting data into traning and test data
-train_features, test_features, train_labels, test_labels = train_test_split(data, 
-                                    labels, test_size = 0.2, random_state = 42)
+    # Finally convert to np array
+    data = np.array(df)
 
-print('Training Features Shape:', train_features.shape)
-print('Training Labels Shape:', train_labels.shape)
-print('Testing Features Shape:', test_features.shape)
-print('Testing Labels Shape:', test_labels.shape)
+    # Spliting data into traning and test data
+    train_data, test_data, train_labels, test_labels = train_test_split(data, 
+                                        labels, test_size = 0.2)
 
-# Random forest classification
+    print('Training Features Shape:', train_data.shape)
+    print('Training Labels Shape:', train_labels.shape)
+    print('Testing Features Shape:', test_data.shape)
+    print('Testing Labels Shape:', test_labels.shape)
 
-# Instantiate model with 500 decision trees
-rf_model = RandomForestClassifier(n_estimators=500, random_state=42)
+    return train_data, test_data, train_labels, test_labels
 
-# Crosvalidation
-crossvalidation(rf_model, train_features, train_labels)
 
-# Train model on training data
-rf_model.fit(train_features, train_labels)
+if __name__ == "__main__":
 
-# Evaluate results
-evaluate_results(rf_model, test_features, test_labels)
+    df = load_dataset('dataset.csv', 'dataset2.csv')
+    df = data_preproccessing(df)
+    train_data, test_data, train_labels, test_labels = split_data(df)
+    # Random forest classification
+    # Instantiate model with 60 decision trees
 
+    rf_model = RandomForestClassifier(n_estimators=60, max_depth=120, min_samples_leaf=2, min_samples_split=2)
+
+    # Crosvalidation
+    crossvalidation(rf_model, train_data, train_labels, 15)
+    crossvalidation(rf_model, train_data, train_labels, 10)
+    crossvalidation(rf_model, train_data, train_labels, 5)
+
+    # Train model on training data
+    rf_model.fit(train_data, train_labels)
+
+    # Evaluate results
+    evaluate_results(rf_model, test_data, test_labels)
+
+
+#param_grid = {
+#    'bootstrap' : [True], 
+#    'max_depth':[120],
+#    'max_features':[14, 16],
+#    'min_samples_leaf':[2],
+#    'min_samples_split':[2,3,4],
+#    'n_estimators':[40,60,80]}
+#
+#rf = RandomForestClassifier()
+#
+#grid_search = GridSearchCV(estimator=rf,param_grid=param_grid,cv=5,n_jobs=-1, verbose=2)
+#grid_search.fit(train_features, train_labels)
+#
+#print(grid_search.best_params_)
