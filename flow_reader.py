@@ -17,7 +17,7 @@ class Flow:
         self.rx_packets = int(rx_packets)
         self.tx_bytes = int(tx_bytes) # Transmitted bytes (without ethernet header)
         self.tx_packets = int(tx_packets)
-        self.label = label # Normal or malicious
+        self.label = label.lower() # Normal or malicious
         # mby add domain but discuss this
         #self.domain = "" 
         self.family = family 
@@ -143,8 +143,8 @@ class FlowReader:
         row.append(items.duration)
         row.append(items.rx_bytes)
         row.append(items.rx_packets)
-        row.append(items.tx_packets)
         row.append(items.tx_bytes)
+        row.append(items.tx_packets)
         row.append(items.rx_bytes + items.tx_bytes)
         row.append(items.rx_packets + items.tx_packets)
         row.append(items.label)
@@ -252,8 +252,8 @@ class SuricataParser:
         row.append(items.duration)
         row.append(items.rx_bytes)
         row.append(items.rx_packets)
-        row.append(items.tx_packets)
         row.append(items.tx_bytes)
+        row.append(items.tx_packets)
         row.append(items.rx_bytes + items.tx_bytes)
         row.append(items.rx_packets + items.tx_packets)
         row.append(items.label)
