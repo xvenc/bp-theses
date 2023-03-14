@@ -1,14 +1,26 @@
 import numpy as np
 import pandas as pd
+import seaborn as sns
+from matplotlib import pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
+from sklearn.metrics import f1_score, auc, roc_curve
 from sklearn.model_selection import GridSearchCV
 
-def evaluate_results(model, test_features, test_labels):
+# Run using python3 random_forest.py
 
+def evaluate_results(model, test_features, test_labels):
     # Use random forest methon on the test data
     results = model.predict(test_features)
+
+    score = f1_score(y_true=test_labels, y_pred=results, labels=test_labels)
+    fpr, tpr, _thresholds = roc_curve(test_labels, results)
+    auc_score = auc(fpr, tpr)
 
     false_positive = 0  # 1 -> 0
     true_positive = 0   # 1 -> 1
@@ -24,21 +36,28 @@ def evaluate_results(model, test_features, test_labels):
         if results[i] == 0 and test_labels[i] == 0:
             true_negative += 1
 
+    print("----------------------------------------------")
     print("RESULTS")
     print("----------------------------------------------")
-    print("False positive:", false_positive)
-    print("True positive:", true_positive)
-    print("False negative:", false_negative)
-    print("True negative:", true_negative)
+    print("False positive:", false_positive, " (detected as malware but it's normal).")
+    print("True positive:", true_positive, "(detected as malware and it's malware).")
+    print("False negative:", false_negative, "(detected as normal and it's normal).")
+    print("True negative:", true_negative, "(detected as normal but it is malware).")
     print("----------------------------------------------")
+    print("F1 score: ",score)
     print("Overall score:", model.score(test_features, test_labels))
-    print("Good detect:", (true_negative + true_positive), "Procentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
-    print("Bad detect:", (false_negative + false_positive), "Procentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
+    print("Good detect:", (true_negative + true_positive), ". Percentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
+    print("Bad detect:", (false_negative + false_positive), ". Percentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
     print("Test data length:", len(test_features))
+
+    return score, round(auc_score, 2), model.score(test_features, test_labels)
 
 def crossvalidation(model, data_train, labels, cv):
     score = cross_val_score(model, data_train, labels, cv=cv, scoring='accuracy', n_jobs=-1, error_score='raise') 
+    print("----------------------------------------------")
+    print("CROSSVALIDATION")
     print(f"Crossvalidation with {cv} folds has score ", np.mean(score))
+    return np.mean(score)
 
 def load_dataset(path1, path2):
     # Load normal and malicious datasets 
@@ -94,8 +113,10 @@ def split_data(df : pd.DataFrame):
 
     # Spliting data into traning and test data
     train_data, test_data, train_labels, test_labels = train_test_split(data, 
-                                        labels, test_size = 0.2)
+                                        labels, test_size = 0.25)
 
+    print("----------------------------------------------")
+    print("DATA SHAPE")
     print('Training Features Shape:', train_data.shape)
     print('Training Labels Shape:', train_labels.shape)
     print('Testing Features Shape:', test_data.shape)
@@ -104,39 +125,62 @@ def split_data(df : pd.DataFrame):
     return train_data, test_data, train_labels, test_labels
 
 
+def perform(model, train_data, train_labels, test_data, test_labels, algorithm):
+    print("----------------------------------------------") 
+    print(algorithm)
+    print("----------------------------------------------") 
+
+    results = {}
+    results['Algorithm'] = algorithm
+
+    # Crosvalidation with K-Folds 15, 10 and 5
+    results['score15'] = crossvalidation(model, train_data, train_labels, 15)
+    results['score10'] = crossvalidation(model, train_data, train_labels, 10)
+    results['score5'] = crossvalidation(model, train_data, train_labels, 5)
+
+    # Train model on training data
+    model.fit(train_data, train_labels)
+
+    # Evaluate results
+    results['F1 score'], results['AUC'], results['Accuracy'] = evaluate_results(model, test_data, test_labels)
+
+    return results
+
+
+def params(train_data, train_labels, model, param_grid):
+
+    grid_search = GridSearchCV(estimator=model,param_grid=param_grid,cv=15,n_jobs=-1, verbose=2)
+    grid_search.fit(train_data, train_labels)
+
+    print(grid_search.best_params_)
+
 if __name__ == "__main__":
 
     df = load_dataset('dataset.csv', 'dataset2.csv')
     df = data_preproccessing(df)
     train_data, test_data, train_labels, test_labels = split_data(df)
-    # Random forest classification
-    # Instantiate model with 60 decision trees
 
+    # Instantiate all the models
     rf_model = RandomForestClassifier(n_estimators=60, max_depth=120, min_samples_leaf=2, min_samples_split=2)
+    knn_model = KNeighborsClassifier(n_neighbors=22)
+    dec_tree = DecisionTreeClassifier()
+    naive_bayes = GaussianNB()
+    svm = SVC()
 
-    # Crosvalidation
-    crossvalidation(rf_model, train_data, train_labels, 15)
-    crossvalidation(rf_model, train_data, train_labels, 10)
-    crossvalidation(rf_model, train_data, train_labels, 5)
+    # Create pandas dataframe for collecting the results
 
-    # Train model on training data
-    rf_model.fit(train_data, train_labels)
+    result_df = pd.DataFrame(columns=['Algorithm', 'score15', 'score10', 'score5', 
+                'F1 score', 'AUC', 'Accuracy'])
 
-    # Evaluate results
-    evaluate_results(rf_model, test_data, test_labels)
+    # Perform machine learning with all the models
+    result_df = result_df.append(perform(rf_model, train_data, train_labels, test_data, test_labels, "RANDOM FOREST"), ignore_index=True) 
+    result_df = result_df.append(perform(knn_model, train_data, train_labels, test_data, test_labels, "KNN"), ignore_index=True) 
+    result_df = result_df.append(perform(dec_tree, train_data, train_labels, test_data, test_labels, "DECISION TREE"), ignore_index=True) 
+    result_df = result_df.append(perform(naive_bayes, train_data, train_labels, test_data, test_labels, "NAIVE BAYES"), ignore_index=True) 
+    result_df = result_df.append(perform(svm, train_data, train_labels, test_data, test_labels, "SVC"), ignore_index=True) 
 
-
-#param_grid = {
-#    'bootstrap' : [True], 
-#    'max_depth':[120],
-#    'max_features':[14, 16],
-#    'min_samples_leaf':[2],
-#    'min_samples_split':[2,3,4],
-#    'n_estimators':[40,60,80]}
-#
-#rf = RandomForestClassifier()
-#
-#grid_search = GridSearchCV(estimator=rf,param_grid=param_grid,cv=5,n_jobs=-1, verbose=2)
-#grid_search.fit(train_features, train_labels)
-#
-#print(grid_search.best_params_)
+    #print(result_df)
+    result_df = result_df.sort_values('Accuracy', ascending=False)
+    sns.set_style('darkgrid')
+    sns.catplot(data=result_df, x='Algorithm', y='Accuracy', kind='bar')
+    plt.show()
