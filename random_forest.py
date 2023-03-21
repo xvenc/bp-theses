@@ -7,6 +7,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
+from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score, auc, roc_curve
@@ -69,7 +70,7 @@ def load_dataset(path1, path2):
 
 def data_preproccessing(df : pd.DataFrame):
     # Specify which columns to use for our model
-    cols = ['Flow id', 'Duration', 'Received bytes','Received packets'
+    cols = ['Duration', 'Received bytes','Received packets'
     ,'Transmitted bytes', 'Transmitted packets', 'Protocol', 
     'Application protocol', 'Total bytes', 'Total packets', 'label']
 
@@ -154,18 +155,35 @@ def params(train_data, train_labels, model, param_grid):
 
     print(grid_search.best_params_)
 
+def boxplot_dataframe(df : pd.DataFrame):
+    num_list = ['Duration', 'Received bytes', 'Received packets',
+               'Transmitted bytes', 'Transmitted packets', 'Total bytes',
+                'Total packets'] 
+    
+    fig = plt.figure(figsize=(15,30))
+
+    for i in range(len(num_list)):
+        column = num_list[i]
+        sub = fig.add_subplot(3, 3, i + 1)
+        sns.boxplot(x='label', y=column, data=df)
+        plt.show()
+
 if __name__ == "__main__":
 
     df = load_dataset('dataset.csv', 'dataset2.csv')
+    #boxplot_dataframe(df)
     df = data_preproccessing(df)
     train_data, test_data, train_labels, test_labels = split_data(df)
 
     # Instantiate all the models
-    rf_model = RandomForestClassifier(n_estimators=60, max_depth=120, min_samples_leaf=2, min_samples_split=2)
+    rf_model = RandomForestClassifier(n_estimators=60, max_depth=120, min_samples_leaf=2, min_samples_split=2, oob_score=True)
     knn_model = KNeighborsClassifier(n_neighbors=22)
     dec_tree = DecisionTreeClassifier()
     naive_bayes = GaussianNB()
     svm = SVC()
+    xgboost = XGBClassifier(n_estimators=100, max_depth=15, colsample_bytree=0.5,
+                gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1)
+
 
     # Create pandas dataframe for collecting the results
 
@@ -174,13 +192,17 @@ if __name__ == "__main__":
 
     # Perform machine learning with all the models
     result_df = result_df.append(perform(rf_model, train_data, train_labels, test_data, test_labels, "RANDOM FOREST"), ignore_index=True) 
-    result_df = result_df.append(perform(knn_model, train_data, train_labels, test_data, test_labels, "KNN"), ignore_index=True) 
+    result_df = result_df.append(perform(knn_model, train_data, train_labels, test_data, test_labels, "K-nearest neighbour"), ignore_index=True) 
     result_df = result_df.append(perform(dec_tree, train_data, train_labels, test_data, test_labels, "DECISION TREE"), ignore_index=True) 
     result_df = result_df.append(perform(naive_bayes, train_data, train_labels, test_data, test_labels, "NAIVE BAYES"), ignore_index=True) 
     result_df = result_df.append(perform(svm, train_data, train_labels, test_data, test_labels, "SVC"), ignore_index=True) 
+    result_df = result_df.append(perform(xgboost, train_data, train_labels, test_data, test_labels, "XGBOOST"), ignore_index=True) 
 
-    #print(result_df)
+    print(result_df)
+    # Show the results of each classifier in the graph
     result_df = result_df.sort_values('Accuracy', ascending=False)
     sns.set_style('darkgrid')
-    sns.catplot(data=result_df, x='Algorithm', y='Accuracy', kind='bar')
-    plt.show()
+    fig, ax = plt.subplots(figsize=(16, 12))
+    sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
+    #plt.show()
+    plt.savefig("img/result.png")
