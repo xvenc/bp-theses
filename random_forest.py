@@ -10,7 +10,7 @@ from sklearn.svm import SVC
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
-from sklearn.metrics import f1_score, auc, roc_curve
+from sklearn.metrics import f1_score, auc, roc_curve, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 
 # Run using python3 random_forest.py
@@ -42,14 +42,15 @@ def evaluate_results(model, test_features, test_labels):
     print("----------------------------------------------")
     print("False positive:", false_positive, " (detected as malware but it's normal).")
     print("True positive:", true_positive, "(detected as malware and it's malware).")
-    print("False negative:", false_negative, "(detected as normal and it's normal).")
-    print("True negative:", true_negative, "(detected as normal but it is malware).")
+    print("False negative:", false_negative, "(detected as normal but it's malware).")
+    print("True negative:", true_negative, "(detected as normal and it's normal).")
     print("----------------------------------------------")
     print("F1 score: ",score)
-    print("Overall score:", model.score(test_features, test_labels))
-    print("Good detect:", (true_negative + true_positive), ". Percentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
-    print("Bad detect:", (false_negative + false_positive), ". Percentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
-    print("Test data length:", len(test_features))
+    print("Overall score: ", model.score(test_features, test_labels))
+    print("Good detect: ", (true_negative + true_positive), ". Percentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
+    print("Bad detect: ", (false_negative + false_positive), ". Percentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
+    print("Test data length: ", len(test_features))
+    print("Confusion matrix ", type(confusion_matrix(test_labels, results)))
 
     return score, round(auc_score, 2), model.score(test_features, test_labels)
 
@@ -168,6 +169,32 @@ def boxplot_dataframe(df : pd.DataFrame):
         sns.boxplot(x='label', y=column, data=df)
         plt.show()
 
+def confusion_matrix_graph(cm_list, model_list, show):
+    fig = plt.figure(figsize=(19,12))
+    for i in range(len(cm_list)):
+        cm = cm_list[i]
+        model = model_list[i]
+        sub = fig.add_subplot(2,3,i+1).set_title(model)
+        cm_plot = sns.heatmap(cm, annot=True, cmap='Blues_r', fmt="d")
+        cm_plot.set_xlabel('Predicted Values')
+        cm_plot.set_ylabel('Acctual Values')
+    
+    if show:
+        plt.show()
+    plt.savefig("img/matrixes.png")
+
+def accuracy_graph(df, show):
+    ## Show the results of each classifier in the graph
+    result_df = df.sort_values('Accuracy', ascending=False)
+    sns.set_style('darkgrid')
+    fig, ax = plt.subplots(figsize=(16, 12))
+    sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
+
+    if show:
+        plt.show()
+    plt.savefig("img/result.png")
+
+   
 if __name__ == "__main__":
 
     df = load_dataset('dataset.csv', 'dataset2.csv')
@@ -176,33 +203,59 @@ if __name__ == "__main__":
     train_data, test_data, train_labels, test_labels = split_data(df)
 
     # Instantiate all the models
-    rf_model = RandomForestClassifier(n_estimators=60, max_depth=120, min_samples_leaf=2, min_samples_split=2, oob_score=True)
-    knn_model = KNeighborsClassifier(n_neighbors=22)
-    dec_tree = DecisionTreeClassifier()
-    naive_bayes = GaussianNB()
-    svm = SVC()
-    xgboost = XGBClassifier(n_estimators=100, max_depth=15, colsample_bytree=0.5,
-                gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1)
+    # n_estimators=50, max_depth=130, min_samples_leaf=1, min_samples_split=3, oob_score=True
+    model_list = ['Random Forest', 'K-Nearest neighbor', 'Decision Tree', 'Naive Bayes',
+                'SVM', 'Xgboost']
+    auc_list = []
+    acc_list = []
+    cm_list = []
+    f1score_list = []
+
+    model_pipeline = []
+    model_pipeline.append(RandomForestClassifier(n_estimators=50, max_depth=140, min_samples_leaf=1, min_samples_split=2, oob_score=False))
+    model_pipeline.append(KNeighborsClassifier(n_neighbors=22))
+    model_pipeline.append(DecisionTreeClassifier())
+    model_pipeline.append(GaussianNB())
+    model_pipeline.append(SVC())
+    model_pipeline.append(XGBClassifier(n_estimators=100, max_depth=15, colsample_bytree=0.5,
+                gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1))
+
+
+    #param_grid = {
+    #    'n_estimators' : [60, 50, 40, 30, 20],
+    #    'max_depth' : [120, 130, 140, 110, 150],
+    #    'min_samples_leaf' : [1,2,3],
+    #    'min_samples_split' : [1,2,3,],
+    #    'oob_score' : [True, False]
+    #}
+    #params(train_data, train_labels, rf_model, param_grid)
 
 
     # Create pandas dataframe for collecting the results
-
     result_df = pd.DataFrame(columns=['Algorithm', 'score15', 'score10', 'score5', 
                 'F1 score', 'AUC', 'Accuracy'])
+    i = 0
+    for model in model_pipeline:
+        # Train model on training data
+        model.fit(train_data, train_labels)
+        y_pred = model.predict(test_data)
+        f1score_list.append(f1_score(y_true=test_labels, y_pred=y_pred, labels=test_labels))
+        acc_list.append(model.score(test_data, test_labels))
+        cm_list.append(confusion_matrix(test_labels, y_pred))
+        fpr, tpr, _thresholds = roc_curve(test_labels, y_pred)
+        auc_list.append(auc(fpr, tpr)) 
+        print()
+        print(f"Model {model_list[i]} accuracy is: {acc_list[i] * 100}%.\nWith {cm_list[i][0][1]} false positives.")
+        print()
+        i += 1
 
-    # Perform machine learning with all the models
-    result_df = result_df.append(perform(rf_model, train_data, train_labels, test_data, test_labels, "RANDOM FOREST"), ignore_index=True) 
-    result_df = result_df.append(perform(knn_model, train_data, train_labels, test_data, test_labels, "K-nearest neighbour"), ignore_index=True) 
-    result_df = result_df.append(perform(dec_tree, train_data, train_labels, test_data, test_labels, "DECISION TREE"), ignore_index=True) 
-    result_df = result_df.append(perform(naive_bayes, train_data, train_labels, test_data, test_labels, "NAIVE BAYES"), ignore_index=True) 
-    result_df = result_df.append(perform(svm, train_data, train_labels, test_data, test_labels, "SVC"), ignore_index=True) 
-    result_df = result_df.append(perform(xgboost, train_data, train_labels, test_data, test_labels, "XGBOOST"), ignore_index=True) 
+    result_df['Algorithm'] = model_list
+    result_df['F1 score'] = f1score_list
+    result_df['AUC'] = auc_list
+    result_df['Accuracy'] = acc_list
 
-    print(result_df)
-    # Show the results of each classifier in the graph
-    result_df = result_df.sort_values('Accuracy', ascending=False)
-    sns.set_style('darkgrid')
-    fig, ax = plt.subplots(figsize=(16, 12))
-    sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
-    #plt.show()
-    plt.savefig("img/result.png")
+    # Print confusion matrix graph
+    confusion_matrix_graph(cm_list, model_list, False)            
+
+    # Show accuracy graph of each model
+    accuracy_graph(result_df, True)
