@@ -221,16 +221,6 @@ if __name__ == "__main__":
                 gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1))
 
 
-    #param_grid = {
-    #    'n_estimators' : [60, 50, 40, 30, 20],
-    #    'max_depth' : [120, 130, 140, 110, 150],
-    #    'min_samples_leaf' : [1,2,3],
-    #    'min_samples_split' : [1,2,3,],
-    #    'oob_score' : [True, False]
-    #}
-    #params(train_data, train_labels, rf_model, param_grid)
-
-
     # Create pandas dataframe for collecting the results
     result_df = pd.DataFrame(columns=['Algorithm', 'score15', 'score10', 'score5', 
                 'F1 score', 'AUC', 'Accuracy'])
