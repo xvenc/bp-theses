@@ -185,12 +185,12 @@ class SuricataParser:
         # Src IP, Dst IP, Dst port, protocol
         return (flow['src_ip'], flow['dest_ip'], flow['dest_port'], flow['proto'])
 
-    def _extract_time(self, timestamp):
+    def extract_time(self, timestamp):
         return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
         
-    def _get_duration(self, start, end):
-        start = self._extract_time(start)
-        end = self._extract_time(end)
+    def get_duration(self, start, end):
+        start = self.extract_time(start)
+        end = self.extract_time(end)
         duration = str(end-start)
         if duration == "0:00:00":
             return 0
@@ -203,7 +203,7 @@ class SuricataParser:
         if index in self.flows.keys():
             return False
         
-        duration = self._get_duration(flow['flow']['start'], flow['flow']['end'])
+        duration = self.get_duration(flow['flow']['start'], flow['flow']['end'])
         app_proto = "-"
         if 'app_proto' in flow:
             if flow['app_proto'] != 'failed':
@@ -216,7 +216,7 @@ class SuricataParser:
 
     def _update_flow(self, new_flow, index):
         cache_flow = self.flows[index]
-        cache_flow.duration += self._get_duration(new_flow['start'], new_flow['end'])
+        cache_flow.duration += self.get_duration(new_flow['start'], new_flow['end'])
         cache_flow.rx_bytes += new_flow['bytes_toclient']
         cache_flow.rx_packets += new_flow['pkts_toclient']
         cache_flow.tx_bytes += new_flow['bytes_toserver']

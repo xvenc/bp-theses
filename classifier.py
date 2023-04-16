@@ -37,7 +37,7 @@ class Classifier:
                             return val
         return None
 
-    def _extract(self, json_obj):
+    def extract(self, json_obj):
         if json_obj['event_type'] == 'dns':
             return self._extract_dns(json_obj)
 
@@ -45,11 +45,11 @@ class Classifier:
             return self._extract_http(json_obj)
 
         elif json_obj['event_type'] == 'tls':
-            return self._extract_ip(json_obj)
+            return self.extract_ip(json_obj)
         else:
             return None
 
-    def _extract_ip(self, json_obj):
+    def extract_ip(self, json_obj):
         if json_obj['event_type'] in ['flow']:
             if json_obj['src_ip'] in self.iocs:
                 return json_obj['src_ip']
@@ -62,8 +62,8 @@ class Classifier:
         for record in open(file, 'r'):
             json_obj = json.loads(record)
             self.log_cnt += 1
-            ioc = self._extract(json_obj)
-            ip_match = self._extract_ip(json_obj)
+            ioc = self.extract(json_obj)
+            ip_match = self.extract_ip(json_obj)
             if (ioc in self.iocs and ioc not in self.ioc_match) or \
                 (ip_match != None and ip_match not in self.ioc_match):
 
@@ -89,7 +89,7 @@ class Classifier:
         for family in self.iocs[ioc]:
             self.match_cnt[family] += 1
 
-    # Function used to read log latest record from file and to proccess these records 
+    # Function used to read log latest record from file and to proccess the record 
     def live_capture(self, file):
         for record in self._tail(open(file, 'r')):
             try:
@@ -99,8 +99,8 @@ class Classifier:
                 # Possible corrupt json entry, so skip to the next one
                 continue
             # Extract iocs and ips from suricata log
-            ioc = self._extract(json_obj)
-            ip_match = self._extract_ip(json_obj)
+            ioc = self.extract(json_obj)
+            ip_match = self.extract_ip(json_obj)
 
             # Check if any of extracted info from suricata is in our malicious IOCs
             # And if it wasn't already matched
