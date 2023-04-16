@@ -34,14 +34,14 @@ class Extractor:
                         cnt += 1
         return cnt
 
-    def extract(self, args, ioc_type):
+    def extract(self, one_sample, sample_name, ioc_type):
         for root, dirs, files in walk(self.dir):
             cnt = 0
             family = self._family_name(root)
             if family == "":
                 continue
             for filename in files:
-                if not args['-m'][0] or path.splitext(filename)[0] == args['-m'][1]:
+                if not one_sample or path.splitext(filename)[0] == sample_name:
                     with open(path.join(root, filename)) as j_file:
                         report = json.load(j_file)
                         iocs = self._get_iocs(report)
