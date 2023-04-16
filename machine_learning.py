@@ -123,28 +123,21 @@ def split_data(df : pd.DataFrame):
     print('Training Labels Shape:', train_labels.shape)
     print('Testing Features Shape:', test_data.shape)
     print('Testing Labels Shape:', test_labels.shape)
+    print("----------------------------------------------")
+    print("Normal data training: ", np.size(train_labels) - np.count_nonzero(train_labels))
+    print("Malware data training: ", np.count_nonzero(train_labels))
+    print("Normal data testing: ", np.size(test_labels) - np.count_nonzero(test_labels))
+    print("Malware data testing: ", np.count_nonzero(test_labels))
 
     return train_data, test_data, train_labels, test_labels
 
 
-def perform(model, train_data, train_labels, test_data, test_labels, algorithm):
-    print("----------------------------------------------") 
-    print(algorithm)
-    print("----------------------------------------------") 
-
+def cross_validation(model, train_data, train_labels):
     results = {}
-    results['Algorithm'] = algorithm
-
     # Crosvalidation with K-Folds 15, 10 and 5
     results['score15'] = crossvalidation(model, train_data, train_labels, 15)
     results['score10'] = crossvalidation(model, train_data, train_labels, 10)
     results['score5'] = crossvalidation(model, train_data, train_labels, 5)
-
-    # Train model on training data
-    model.fit(train_data, train_labels)
-
-    # Evaluate results
-    results['F1 score'], results['AUC'], results['Accuracy'] = evaluate_results(model, test_data, test_labels)
 
     return results
 
@@ -181,7 +174,7 @@ def confusion_matrix_graph(cm_list, model_list, show):
     
     if show:
         plt.show()
-    plt.savefig("img/matrixes.png")
+    #plt.savefig("img/matrixes.png")
 
 def accuracy_graph(df, show):
     ## Show the results of each classifier in the graph
@@ -198,7 +191,6 @@ def accuracy_graph(df, show):
 if __name__ == "__main__":
 
     df = load_dataset('dataset.csv', 'dataset2.csv')
-    #boxplot_dataframe(df)
     df = data_preproccessing(df)
     train_data, test_data, train_labels, test_labels = split_data(df)
 
@@ -236,6 +228,7 @@ if __name__ == "__main__":
         auc_list.append(auc(fpr, tpr)) 
         print()
         print(f"Model {model_list[i]} accuracy is: {acc_list[i] * 100}%.\nWith {cm_list[i][0][1]} false positives.")
+        scores = cross_validation(model, train_data, train_labels)
         print()
         i += 1
 
@@ -245,7 +238,7 @@ if __name__ == "__main__":
     result_df['Accuracy'] = acc_list
 
     # Print confusion matrix graph
-    confusion_matrix_graph(cm_list, model_list, False)            
+    confusion_matrix_graph(cm_list, model_list, False)
 
     # Show accuracy graph of each model
     accuracy_graph(result_df, True)
