@@ -27,6 +27,9 @@ class Flow:
 
 class FlowReader:
 
+    update = 0
+    create = 0
+
     def __init__(self):
         # The key to the dict is composed of 5 features
         # Src and dst IP, src and dst port and protocol
@@ -37,23 +40,13 @@ class FlowReader:
         return root.replace(out_dir, "")
 
     def _create_tuple(self, flow):
-        flow['src'], src_p = flow['src'].split(":", 1)
-        flow['dst'], dst_p = flow['dst'].split(":", 1)
-        # TODO discuss this
-        #return (flow['src'], flow['dst'], src_p, dst_p ,flow['proto'])
+        src_ip, src_p = flow['src'].split(":", 1)
+        dst_ip, dst_p = flow['dst'].split(":", 1)
+        return (src_ip, dst_ip, src_p, dst_p ,flow['proto'])
         #return (flow['dst'], dst_p ,flow['proto'])
-        return (flow['src'], flow['dst'], dst_p ,flow['proto'])
+        #return (flow['src'], flow['dst'], dst_p ,flow['proto'])
 
-    def _extract_flow(self, report, label, family):
-        if 'flows' not in report:
-            return
-
-        for flow in report['flows']:
-            index = self._create_tuple(flow)            
-            if not self._create_flow(index, flow, label, family):
-                # Flow alredy exist so increase the numbers
-                self._increase_flow(self.flows[index], flow)
-            
+       
     def _get_duration(self, flow):
         if 'last_seen' in flow or 'first_seen' in flow:
             return flow['last_seen'] - flow['first_seen']
@@ -102,23 +95,42 @@ class FlowReader:
         
 
     def _create_flow(self, index, flow, label, family):
-        if index in self.flows.keys():
-            return False
+
 
         duration = self._get_duration(flow) 
         app_proto = self._get_app_protocol(flow)
         domain = self._get_domain(flow)
+        dst_port = 0
+        if len(flow['dst'].split(':',1)) > 1:
+            dst_port = flow['dst'].split(':',1)[1]
+
         if domain in self.domains or app_proto == 'dns':
             label = "Normal"
         
         if label == "Normal":
             family = "-"
-        
-        self.flows[index] = Flow(index[0], index[1], index[2], flow['proto'],
+         
+        self.flows[index] = Flow(flow['src'].split(':',1)[0], flow['dst'].split(':',1)[0], 
+                dst_port, flow['proto'],
                 app_proto, duration, flow['rx_bytes'], flow['rx_packets'], 
                 flow['tx_bytes'], flow['tx_packets'], label, family)
 
         return True
+
+    def _extract_flow(self, report, label, family):
+        if 'flows' not in report:
+            return
+
+        for flow in report['flows']:
+            index = self._create_tuple(flow)            
+            if index in self.flows.keys():
+                # Flow alredy exist so increase the numbers
+                self._increase_flow(self.flows[index], flow)
+                self.update += 1
+            else:
+                self._create_flow(index, flow, label, family)
+                self.create += 1
+                
 
     def proccess_flows(self, directory, label):
         for root, dirs, files in walk(directory):
@@ -131,6 +143,9 @@ class FlowReader:
                     if report['network']:
                         #print(root+"/"+filename)
                         self._extract_flow(report['network'], label, family)
+
+        print("Updated: ", self.update)
+        print("Created: ", self.create)
 
     def create_row(self, key, items):
         row = []
@@ -178,12 +193,15 @@ class FlowReader:
     
 class SuricataParser:
 
+    update = 0
+    create = 0
+
     def __init__(self):
         self.flows = dict()
 
     def _create_tuple(self, flow):
         # Src IP, Dst IP, Dst port, protocol
-        return (flow['src_ip'], flow['dest_ip'], flow['dest_port'], flow['proto'])
+        return (flow['src_ip'], flow['dest_ip'],flow['src_port']  ,flow['dest_port'], flow['proto'])
 
     def extract_time(self, timestamp):
         return datetime.strptime(timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
@@ -200,16 +218,13 @@ class SuricataParser:
         return time 
 
     def _create_flow_record(self, flow, index):
-        if index in self.flows.keys():
-            return False
-        
         duration = self.get_duration(flow['flow']['start'], flow['flow']['end'])
         app_proto = "-"
         if 'app_proto' in flow:
             if flow['app_proto'] != 'failed':
                 app_proto = flow['app_proto']
 
-        self.flows[index] = Flow(index[0], index[1], index[2], flow['proto'],
+        self.flows[index] = Flow(flow['src_ip'], flow['dest_ip'], flow['dest_port'], flow['proto'],
                 app_proto, duration, flow['flow']['bytes_toclient'], 
                 flow['flow']['pkts_toclient'], flow['flow']['bytes_toserver'],
                 flow['flow']['pkts_toserver'], "Normal", "-")
@@ -225,9 +240,13 @@ class SuricataParser:
 
     def _extract_features(self, flow):
         index = self._create_tuple(flow)
-        if not self._create_flow_record(flow, index):
+        if index in self.flows.keys():
             # Flow is already in the cache
             self._update_flow(flow['flow'], index)
+            self.update += 1
+        else:
+            self._create_flow_record(flow, index)
+            self.create += 1
 
 
     def proccess_flows(self, file, label = "Normal"):
@@ -235,6 +254,9 @@ class SuricataParser:
             flow = json.loads(record)
             if flow['proto'] in ['UDP', 'TCP']:
                 self._extract_features(flow)
+        
+        print("Updated: ", self.update)
+        print("Created: ", self.create)
 
     def print_flows(self):
         print("\t\t\tKey\t\t\t app_proto duration rx_b rx_p tx_b tx_p label")
