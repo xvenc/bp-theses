@@ -123,6 +123,9 @@ class MLClassifier:
             flow = self.prepare_values(flow) 
             flow_df = pd.DataFrame(flow, index=[0,])
             flow_numpy = flow_df.to_numpy()
-            return self.model.predict(flow_numpy)
+            try:
+                return self.model.predict(flow_numpy)
+            except:
+                return None
 
         return None

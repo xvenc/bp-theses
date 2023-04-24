@@ -13,6 +13,42 @@ from sklearn.ensemble import RandomForestClassifier
 suricata_log = "/var/log/suricata/all.json"
 normal_dataset = "dataset2.csv"
 malware_dataset = "dataset.csv"
+
+
+class Stats:
+
+    log_cnt = 0
+    malware = 0
+    normal = 0
+    tmp_malware = 0
+    tmp_normal = 0
+    
+    def __init__(self):
+        pass
+
+    def inc_log_cnt(self):
+        self.log_cnt += 1
+
+    def increment_malware(self):
+        self.tmp_malware += 1
+        self.malware += 1
+
+    def increment_normal(self):
+        self.tmp_normal += 1
+        self.normal += 1 
+
+    def reset(self):
+        self.tmp_malware = 0
+        self.tmp_normal = 0
+
+    def score(self):
+        print("--------------------------------------")
+        print("Percentage of normal flows: " round(self.normal/self.log_cnt)*100,2)
+        print("Percentage of malware flows: " round(self.malware/self.log_cnt)*100,2)
+        print("Number of IOC's: ")
+
+statistics = Stats()
+
 # Function to parse command line arguments
 def argparse():
     # -d for folder to extract from
@@ -48,7 +84,7 @@ def argparse():
 # Function to handle SIGINT and exit with 0 and print overall statistics
 def handler(signum, frame):
     print("\n")
-    #classifier.score()
+    statistics.score()
     sys.exit(0)
 
 # Function to read last entry from log file
@@ -62,23 +98,22 @@ def tail(file_stream):
         line = file_stream.readline()
         yield line
 
-
-def stats(log_cnt, malicious, normal):
-    threading.Timer(180, stats).start()
-    print("Normal: ",normal)
-    print("Malicious: ", malicious)
-    print("All: ", log_cnt)
+def stats(statistics):
+    threading.Timer(30, stats, args=[statistics],).start()
+    # TODO add printing stats and warning
+    print("Normal: ",statistics.tmp_normal)
+    print("Malicious: ", statistics.tmp_malware)
+    print("All: ", statistics.log_cnt)
+    print("\n")
+    statistics.reset()
 
 def live_caputure(log_file, ioc_classifier, ml_classifier):
-    log_cnt = 0
-    malicious = 0
-    normal = 0
     found_ioc = []
-    stats(log_cnt, malicious, normal)
+    stats(statistics)
     for record in tail(open(log_file, 'r')):
         try:
             json_obj = json.loads(record)
-            log_cnt += 1
+            statistics.inc_log_cnt()
         except ValueError:
             # Possible corrupt json entry, so skip to the next one
             continue
@@ -87,25 +122,33 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
         ioc = ioc_classifier.extract(json_obj)
         ip_match = ioc_classifier.extract_ip(json_obj)
 
+        if ip_match == "8.8.8.8":
+            ip_match = None
+
         # If it's a flow predict if its a malicious one
         predicted = ml_classifier.predict(json_obj)
 
         if predicted == 1:
-            malicous += 1
+            statistics.increment_malware()
+            print("Malicious ", statistics.malware)
         else:
-            normal += 1
+            statistics.increment_normal()
+            print("Normal ", statistics.normal)
         
         if ioc in ioc_classifier.iocs:
+            print("Found ioc: ", ioc)
             found_ioc.append(ioc)
         
         if ip_match != None:
+
+            print("Found ip: ", ip_match)
             found_ioc.append(ioc)
 
     res = [*set(found_ioc)]
-    print("Normal: ",normal)
-    print("Malicious: ", malicous)
-    print("All: ", log_cnt)
-    print("Found IOCS: ", res)
+    #print("Normal: ", )
+    #print("Malicious: ", malicious)
+    #print("All: ", log_cnt)
+    #print("Found IOCS: ", res)
 
 # MAIN
 if __name__ == "__main__":
