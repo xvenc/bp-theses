@@ -1,5 +1,4 @@
 triage/
-*.csv
 malware/
 logs/
 pcaps/
