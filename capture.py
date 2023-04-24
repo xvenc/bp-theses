@@ -3,6 +3,7 @@ import sys
 import json
 import signal
 import os
+import threading
 from classifier import Classifier
 from extractor import Extractor
 from ml_classifier import MLClassifier
@@ -61,8 +62,19 @@ def tail(file_stream):
         line = file_stream.readline()
         yield line
 
+
+def stats(log_cnt, malicious, normal):
+    threading.Timer(180, stats).start()
+    print("Normal: ",normal)
+    print("Malicious: ", malicious)
+    print("All: ", log_cnt)
+
 def live_caputure(log_file, ioc_classifier, ml_classifier):
     log_cnt = 0
+    malicious = 0
+    normal = 0
+    found_ioc = []
+    stats(log_cnt, malicious, normal)
     for record in tail(open(log_file, 'r')):
         try:
             json_obj = json.loads(record)
@@ -78,11 +90,22 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
         # If it's a flow predict if its a malicious one
         predicted = ml_classifier.predict(json_obj)
 
-        print(f"IOC: {ioc}\tIP: {ip_match}\tML predict: {predicted}\tLOG: {log_cnt}")
+        if predicted == 1:
+            malicous += 1
+        else:
+            normal += 1
+        
+        if ioc in ioc_classifier.iocs:
+            found_ioc.append(ioc)
+        
+        if ip_match != None:
+            found_ioc.append(ioc)
 
-        # Check if any IOC appeared
-        if ioc in ioc_classifier.iocs or ip_match != None or predicted == 1:
-            pass
+    res = [*set(found_ioc)]
+    print("Normal: ",normal)
+    print("Malicious: ", malicous)
+    print("All: ", log_cnt)
+    print("Found IOCS: ", res)
 
 # MAIN
 if __name__ == "__main__":
