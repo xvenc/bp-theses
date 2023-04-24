@@ -154,6 +154,8 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
 if __name__ == "__main__":
     args, cmds = argparse()
     extractor = Extractor()
+    extractor.read_common_domains("common.txt")
+    extractor.read_common_ips("common_ips.txt")
     extractor.extract(args['-m'][0], args['-m'][1], args['-t'][1]) # Extract ioc's from the report files
     classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt) # Classifier to classifi if DNS, TLS or HTTP containe IOC's
     ml_classifier = MLClassifier(RandomForestClassifier(n_estimators=50, max_depth=140, min_samples_leaf=1, min_samples_split=2, oob_score=False),
