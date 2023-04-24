@@ -12,6 +12,21 @@ class Extractor:
 
     def __init__(self, report_dir = "out/reports/"):
         self.dir = report_dir
+        self.domains = list()
+        self.ips = list()
+
+    def read_common_domains(self, file):
+        with open(file, "r") as f:
+            data = f.readlines()
+            self.domains = [l.strip() for l in data]
+            self.domains = list(dict.fromkeys(self.domains))
+    
+    def read_common_ips(self, file):
+        with open(file, "r") as f:
+            data = f.readlines()
+            self.ips = [l.strip() for l in data]
+            self.ips = list(dict.fromkeys(self.ips))
+ 
 
     def _family_name(self, root):
         return root.replace(self.dir, "")
@@ -25,6 +40,9 @@ class Extractor:
         for key, vals in iocs.items():
             if not ioc_type or key == ioc_type:
                 for val in vals:
+                    # Check if it is a common ip or domain
+                    if val in self.domains or val in self.ips:
+                        continue
                     if val not in self.ioc_map:
                         self.ioc_map[val] = []
                         self.ioc_map[val].append(family)
