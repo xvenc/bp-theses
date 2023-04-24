@@ -43,8 +43,8 @@ class Stats:
 
     def score(self):
         print("--------------------------------------")
-        print("Percentage of normal flows: " round(self.normal/self.log_cnt)*100,2)
-        print("Percentage of malware flows: " round(self.malware/self.log_cnt)*100,2)
+        print("Percentage of normal flows: ", round(self.normal/self.log_cnt)*100,2)
+        print("Percentage of malware flows: ", round(self.malware/self.log_cnt)*100,2)
         print("Number of IOC's: ")
 
 statistics = Stats()
