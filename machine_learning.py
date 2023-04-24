@@ -15,50 +15,11 @@ from sklearn.model_selection import GridSearchCV
 
 # Run using python3 random_forest.py
 
-def evaluate_results(model, test_features, test_labels):
-    # Use random forest methon on the test data
-    results = model.predict(test_features)
-
-    score = f1_score(y_true=test_labels, y_pred=results, labels=test_labels)
-    fpr, tpr, _thresholds = roc_curve(test_labels, results)
-    auc_score = auc(fpr, tpr)
-
-    false_positive = 0  # 1 -> 0
-    true_positive = 0   # 1 -> 1
-    false_negative = 0  # 0 -> 1
-    true_negative = 0   # 0 -> 0
-    for i in range(len(test_features)):
-        if results[i] == 1 and test_labels[i] == 0:
-            false_positive += 1
-        if results[i] == 1 and test_labels[i] == 1:
-            true_positive += 1
-        if results[i] == 0 and test_labels[i] == 1:
-            false_negative += 1
-        if results[i] == 0 and test_labels[i] == 0:
-            true_negative += 1
-
-    print("----------------------------------------------")
-    print("RESULTS")
-    print("----------------------------------------------")
-    print("False positive:", false_positive, " (detected as malware but it's normal).")
-    print("True positive:", true_positive, "(detected as malware and it's malware).")
-    print("False negative:", false_negative, "(detected as normal but it's malware).")
-    print("True negative:", true_negative, "(detected as normal and it's normal).")
-    print("----------------------------------------------")
-    print("F1 score: ",score)
-    print("Overall score: ", model.score(test_features, test_labels))
-    print("Good detect: ", (true_negative + true_positive), ". Percentages: ",((true_negative + true_positive) / float(len(test_features)))*100, "%" )
-    print("Bad detect: ", (false_negative + false_positive), ". Percentages: ",((false_negative + false_positive) / float(len(test_features)))*100, "%")
-    print("Test data length: ", len(test_features))
-    print("Confusion matrix ", type(confusion_matrix(test_labels, results)))
-
-    return score, round(auc_score, 2), model.score(test_features, test_labels)
-
 def crossvalidation(model, data_train, labels, cv):
     score = cross_val_score(model, data_train, labels, cv=cv, scoring='accuracy', n_jobs=-1, error_score='raise') 
     print("----------------------------------------------")
     print("CROSSVALIDATION")
-    print(f"Crossvalidation with {cv} folds has score ", np.mean(score))
+    print(f"Crossvalidation with {cv} folds has score ", round(np.mean(score),4))
     return np.mean(score)
 
 def load_dataset(path1, path2):
@@ -163,31 +124,84 @@ def boxplot_dataframe(df : pd.DataFrame):
         plt.show()
 
 def confusion_matrix_graph(cm_list, model_list, show):
-    fig = plt.figure(figsize=(19,12))
+    fig = plt.figure(figsize=(12,20))
     for i in range(len(cm_list)):
         cm = cm_list[i]
         model = model_list[i]
-        sub = fig.add_subplot(2,3,i+1).set_title(model)
+        sub = fig.add_subplot(3,2,i+1).set_title(model)
         cm_plot = sns.heatmap(cm, annot=True, cmap='Blues_r', fmt="d")
         cm_plot.set_xlabel('Predicted Values')
         cm_plot.set_ylabel('Acctual Values')
     
+    plt.savefig("img/matrixes.png", bbox_inches='tight')
     if show:
         plt.show()
-    #plt.savefig("img/matrixes.png")
 
 def accuracy_graph(df, show):
     ## Show the results of each classifier in the graph
     result_df = df.sort_values('Accuracy', ascending=False)
     sns.set_style('darkgrid')
-    fig, ax = plt.subplots(figsize=(16, 12))
+    fig, ax = plt.subplots(figsize=(18, 10))
     sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
 
+    plt.savefig("img/result.png", bbox_inches='tight')
     if show:
         plt.show()
-    plt.savefig("img/result.png")
 
-   
+
+def perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels):
+
+    auc_list = []
+    acc_list = []
+    cm_list = []
+    f1score_list = []
+    fpr_list = []
+    pre_list = []
+    sen_list = []
+
+    # Create pandas dataframe for collecting the results
+    result_df = pd.DataFrame(columns=['Algorithm', 'score15', 'score10', 'score5', 
+                'F1 score', 'SEN', 'FPR', 'PRE','Accuracy'])
+    i = 0
+    for model in model_pipeline:
+        # Train model on training data
+        model.fit(train_data, train_labels)
+        y_pred = model.predict(test_data)
+        f1score_list.append(round(f1_score(y_true=test_labels, y_pred=y_pred, labels=test_labels),4))
+        acc_list.append(round(model.score(test_data, test_labels),4))
+        cm_list.append(confusion_matrix(test_labels, y_pred))
+        #fpr, tpr, _thresholds = roc_curve(test_labels, y_pred)
+        #auc_list.append(auc(fpr, tpr)) 
+        tp = cm_list[i][1][1]
+        tn = cm_list[i][0][0]
+        fp = cm_list[i][0][1]
+        fn = cm_list[i][1][0]
+        fpr = round(fp/(fp+tn),4)
+        pre = round(tp/(tp+fp),4)
+        sen = round(tp/(tp+fn),4)
+        pre_list.append(pre)
+        fpr_list.append(fpr)
+        sen_list.append(sen)
+        print(f"\nModel {model_list[i]}")
+        print(f"Accuracy: {acc_list[i]}\nFPR: {fpr}\nPrecision: {pre}\nSensitivity: {sen}\nF1 score: {f1score_list[i]}")
+        #print(f"Model {model_list[i]} accuracy is: {round(acc_list[i],4)}%.\nWith {cm_list[i][0][1]} false positives.")
+        #scores = cross_validation(model, train_data, train_labels)
+        i += 1
+
+    result_df['Algorithm'] = model_list
+    result_df['F1 score'] = f1score_list
+    result_df['SEN'] = sen_list
+    result_df['FPR'] = fpr_list
+    result_df['PRE'] = pre_list
+    result_df['Accuracy'] = acc_list
+
+    # Show accuracy graph of each model
+    #accuracy_graph(result_df, False)
+
+    # Print confusion matrix graph
+    #confusion_matrix_graph(cm_list, model_list, False)
+
+
 if __name__ == "__main__":
 
     df = load_dataset('dataset.csv', 'dataset2.csv')
@@ -196,49 +210,39 @@ if __name__ == "__main__":
 
     # Instantiate all the models
     # n_estimators=50, max_depth=130, min_samples_leaf=1, min_samples_split=3, oob_score=True
-    model_list = ['Random Forest', 'K-Nearest neighbor', 'Decision Tree', 'Naive Bayes',
-                'SVM', 'Xgboost']
-    auc_list = []
-    acc_list = []
-    cm_list = []
-    f1score_list = []
-
+    model_list = ['Random Forest','Random Forest', 'Xgboost', 'Xgboost']
     model_pipeline = []
-    model_pipeline.append(RandomForestClassifier(n_estimators=50, max_depth=140, min_samples_leaf=1, min_samples_split=2, oob_score=False))
-    model_pipeline.append(KNeighborsClassifier(n_neighbors=22))
-    model_pipeline.append(DecisionTreeClassifier())
-    model_pipeline.append(GaussianNB())
-    model_pipeline.append(SVC())
-    model_pipeline.append(XGBClassifier(n_estimators=100, max_depth=15, colsample_bytree=0.5,
-                gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1))
+    #model_pipeline.append(RandomForestClassifier(n_estimators=80, max_depth=130, min_samples_leaf=1, min_samples_split=2, oob_score=False))
+    model_pipeline.append(RandomForestClassifier(n_estimators=40, max_depth=130, min_samples_leaf=1, min_samples_split=2, oob_score=True))
+    model_pipeline.append(RandomForestClassifier(n_estimators=100, max_depth=160, min_samples_leaf=1, min_samples_split=2, oob_score=True))
+    #model_pipeline.append(XGBClassifier(n_estimators=100, max_depth=15, colsample_bytree=0.5, gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1))
+    model_pipeline.append(XGBClassifier(n_estimators=50, max_depth=20, colsample_bytree=0.8, gamma=1, learning_rate=0.1, reg_lambda=1, subsample=0.8, scale_pos_weight=1))
+    #model_pipeline.append(XGBClassifier(n_estimators=100, max_depth=20, colsample_bytree=0.8, gamma=1, learning_rate=0.1, reg_lambda=1, subsample=1, scale_pos_weight=1))
+    #model_pipeline.append(XGBClassifier(n_estimators=120, max_depth=20, colsample_bytree=0.8, gamma=1, learning_rate=0.2, reg_lambda=1, subsample=1, scale_pos_weight=1))
+    model_pipeline.append(XGBClassifier(n_estimators=150, max_depth=10, colsample_bytree=0.8, gamma=1, learning_rate=0.2, reg_lambda=1, subsample=1, scale_pos_weight=1))
 
+    normal_list = ['Random Forest', 'K-Nearest neighbor', 'Decision Tree', 'Naive Bayes',
+                'SVM', 'Xgboost']
+    #normal_list = ['Random Forest','Xgboost']
+    normal_models = []
+    normal_models.append(RandomForestClassifier())
+    normal_models.append(KNeighborsClassifier())
+    normal_models.append(DecisionTreeClassifier())
+    normal_models.append(GaussianNB())
+    normal_models.append(SVC())
+    normal_models.append(XGBClassifier())
 
-    # Create pandas dataframe for collecting the results
-    result_df = pd.DataFrame(columns=['Algorithm', 'score15', 'score10', 'score5', 
-                'F1 score', 'AUC', 'Accuracy'])
-    i = 0
-    for model in model_pipeline:
-        # Train model on training data
-        model.fit(train_data, train_labels)
-        y_pred = model.predict(test_data)
-        f1score_list.append(f1_score(y_true=test_labels, y_pred=y_pred, labels=test_labels))
-        acc_list.append(model.score(test_data, test_labels))
-        cm_list.append(confusion_matrix(test_labels, y_pred))
-        fpr, tpr, _thresholds = roc_curve(test_labels, y_pred)
-        auc_list.append(auc(fpr, tpr)) 
-        print()
-        print(f"Model {model_list[i]} accuracy is: {acc_list[i] * 100}%.\nWith {cm_list[i][0][1]} false positives.")
-        scores = cross_validation(model, train_data, train_labels)
-        print()
-        i += 1
+    rf = RandomForestClassifier()
+    xgb = XGBClassifier()
+    param_grid = {
+        'n_estimators' : [60, 50, 40, 120 ,80, 100, 150],
+        'max_depth' : [10,20,30,18],
+        'subsample' : [0.8,1, 2],
+        'learning_rate' : [0.1,0.2, 0.3]
+    }
+    #params(train_data, train_labels, xgb, param_grid)
 
-    result_df['Algorithm'] = model_list
-    result_df['F1 score'] = f1score_list
-    result_df['AUC'] = auc_list
-    result_df['Accuracy'] = acc_list
-
-    # Print confusion matrix graph
-    confusion_matrix_graph(cm_list, model_list, False)
-
-    # Show accuracy graph of each model
-    accuracy_graph(result_df, True)
+    print("\n---------------NEW PARAMS----------------")
+    perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels)
+    print("\n---------------OLD PARAMS----------------\n")
+    perform(normal_models, normal_list, train_data, train_labels, test_data, test_labels) 
