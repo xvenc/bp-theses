@@ -1,10 +1,14 @@
+"""
+ml_classifier.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul class definition for preparing data from captured flow and classifing the flow 
+"""
+
 import os
 import pandas as pd
-import json
-from extractor import Extractor
-from machine_learning import load_dataset, data_preproccessing, split_data
+from machine_learning import data_preproccessing, split_data
 from flow_reader import SuricataParser
-from sklearn.ensemble import RandomForestClassifier
 
 suricata_log = "test_tmp/eve-flow.json"
 

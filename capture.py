@@ -1,3 +1,10 @@
+"""
+capture.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Main modul for live or offline capture and classification of network traffic
+"""
+
 import getopt
 import sys
 import json

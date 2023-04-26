@@ -1,3 +1,10 @@
+"""
+sample_downloader.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with definition of class to download malware samples of specified malware family
+"""
+
 import requests
 from os import path
 from pathlib import Path

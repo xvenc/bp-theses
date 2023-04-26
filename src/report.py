@@ -1,3 +1,10 @@
+"""
+report.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Function for creating report file names, and checking if this report already exists
+"""
+
 import json
 from os import path, listdir
 

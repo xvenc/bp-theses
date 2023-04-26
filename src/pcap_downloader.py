@@ -1,3 +1,10 @@
+"""
+pcap_downloader.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with definition of class to download pcap files for each individual malware sample that has been analyzed
+"""
+
 from requests import Session
 from os import path, walk
 from pathlib import Path

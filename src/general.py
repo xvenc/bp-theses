@@ -1,3 +1,11 @@
+"""
+general.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with class for colors of text, help function and other basic functions (argument parsing, read file lines) 
+"""
+
+
 from pathlib import Path
 from os import listdir, path
 import getopt

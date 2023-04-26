@@ -1,3 +1,11 @@
+"""
+classifier.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with definition of class for extracting important information from Suricata flow records 
+and for classifing if the information is malware IOC
+"""
+
 import json
 import os
 

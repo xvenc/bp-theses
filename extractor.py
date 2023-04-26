@@ -1,3 +1,10 @@
+"""
+extractor.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with definition of class for extracting malware IOC from triage report files
+"""
+
 import json
 from os import walk, path
 

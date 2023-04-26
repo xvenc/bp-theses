@@ -1,3 +1,10 @@
+"""
+csv_writer.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Functions for work with csv log file (writing new record, checking if was already recorded) 
+"""
+
 import csv
 from os import path
 

@@ -1,3 +1,12 @@
+"""
+flow_reader.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with definition of class for representing important informations extracted from flows
+Modul with definition of class for extracting flows from Suricata log file and creating hash table with them
+Modul with definition of class for extracting malware flows from triage report file and creating hash table with them
+"""
+
 import json
 from os import walk, path
 from datetime import datetime

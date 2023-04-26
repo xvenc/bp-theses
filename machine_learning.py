@@ -1,3 +1,10 @@
+"""
+machine_learning.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with comparasion of various machine learning algorithms on the same dataset
+"""
+
 import numpy as np
 import pandas as pd
 import seaborn as sns

@@ -1,3 +1,10 @@
+"""
+sample_uploader.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Modul with definition of class to upload malware samples to triage sandbox for dynamic analysis 
+"""
+
 from src.general import bcolors, create_folder
 from src.report import *
 from os import walk, path

@@ -1,3 +1,10 @@
+"""
+ml_classifier.py
+Bachelor thesis 2022/2023
+Author: Václav Korvas VUT FIT 3BIT 
+Main modul for downloading malware samples, sending them to analysis and downloading all reports and pcap files
+"""
+
 import triage
 from os import  path
 import csv
