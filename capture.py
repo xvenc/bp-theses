@@ -107,7 +107,6 @@ def tail(file_stream):
 
 def stats(statistics):
     threading.Timer(30, stats, args=[statistics],).start()
-    # TODO add printing stats and warning
     print("Normal: ",statistics.tmp_normal)
     print("Malicious: ", statistics.tmp_malware)
     print("All: ", statistics.log_cnt)
@@ -129,15 +128,12 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
         ioc = ioc_classifier.extract(json_obj)
         ip_match = ioc_classifier.extract_ip(json_obj)
 
-        if ip_match == "8.8.8.8":
-            ip_match = None
-
         # If it's a flow predict if its a malicious one
         predicted = ml_classifier.predict(json_obj)
 
         if predicted == 1:
             statistics.increment_malware()
-            print("Malicious ", statistics.malware)
+            print(f"Malicious number {statistics.malware} with src IP: {json_obj['src_ip']}:{json_obj['src_port']} and dst IP: {json_obj['dest_ip']}:{json_obj['dest_port']}")
         else:
             statistics.increment_normal()
             print("Normal ", statistics.normal)
@@ -147,7 +143,6 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
             found_ioc.append(ioc)
         
         if ip_match != None:
-
             print("Found ip: ", ip_match)
             found_ioc.append(ioc)
 
