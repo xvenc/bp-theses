@@ -107,7 +107,7 @@ def tail(file_stream):
 
 def stats(statistics):
     threading.Timer(30, stats, args=[statistics],).start()
-    print("Normal: ",statistics.tmp_normal)
+    print("\nNormal: ",statistics.tmp_normal)
     print("Malicious: ", statistics.tmp_malware)
     print("All: ", statistics.log_cnt)
     print("\n")
@@ -134,7 +134,7 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
         if predicted == 1:
             statistics.increment_malware()
             print(f"Malicious number {statistics.malware} with src IP: {json_obj['src_ip']}:{json_obj['src_port']} and dst IP: {json_obj['dest_ip']}:{json_obj['dest_port']}")
-        else:
+        elif predicted == 0:
             statistics.increment_normal()
             print("Normal ", statistics.normal)
         
@@ -171,7 +171,7 @@ if __name__ == "__main__":
     while True and cmds['--live']:
         # Live capture from Suricata log file
         if i == 0:
-            print("\n\nLive capture started\n\n")
+            print("\n\nLive capture started")
             i += 1
         live_caputure(suricata_log, classifier, ml_classifier)
 
