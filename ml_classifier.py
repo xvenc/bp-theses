@@ -2,7 +2,7 @@
 ml_classifier.py
 Bachelor thesis 2022/2023
 Author: Václav Korvas VUT FIT 3BIT 
-Modul class definition for preparing data from captured flow and classifing the flow 
+Modul with class definition for preparing data from captured flow and classifing the flow 
 """
 
 import os
@@ -46,7 +46,9 @@ class MLClassifier:
         flow = {}
         if 'app_proto' in flow_record:
             if flow_record['app_proto'] != 'failed':
-                app_proto = flow_record['app_proto'].lower()
+                if flow_record['app_proto'] in ["tls", "dns", 'http', 'https']:
+                    app_proto = flow_record['app_proto'].lower()
+                
 
         flow['Duration'] = duration
         flow['Protocol'] = flow_record['proto'].lower()
@@ -126,6 +128,7 @@ class MLClassifier:
             flow = self.get_values(flow)
             flow = self.prepare_values(flow) 
             flow_df = pd.DataFrame(flow, index=[0,])
+            print(flow_df)
             flow_numpy = flow_df.to_numpy()
             try:
                 return self.model.predict(flow_numpy)
