@@ -9,6 +9,9 @@ import json
 from os import path, listdir
 
 def create_report_file(directory, appendix = ""):
+    """
+    Create triage report file name, based on what kind of report it is
+    """
     log_f = directory.replace('/','_')
     if log_f.endswith('_'):
         log_f = log_f[:-1] + appendix + ".json"
@@ -17,11 +20,17 @@ def create_report_file(directory, appendix = ""):
     return log_f
 
 def create_report(report, log_f, log_dir):
+    """
+    Create report file name and write it's content
+    """
     json_object = json.dumps(report, indent=4)
     with open(path.join(log_dir, log_f), "w") as outfile:
         outfile.write(json_object)
 
 def check_downloaded(log_dir, f):
+    """
+    Check if report file was already downloaded
+    """
     f_base = path.basename(f)
     for file in listdir(log_dir):
         if path.splitext(file)[0] == path.splitext(f_base)[0]:
