@@ -9,10 +9,9 @@ import json
 from os import walk, path
 
 class Extractor:
-
     """
-    dict: IOC's -> malware
-    dict: malware_cnt -> number of IOS's
+    Class to extract all the IOC's from triage sandbox overview reports and 
+    store them into dictionary
     """
     ioc_map = {} # dictionary to map ioc indicator to family
     ioc_cnt = {} # dictionary to map family to exact number of indicators
@@ -23,12 +22,18 @@ class Extractor:
         self.ips = list()
 
     def read_common_domains(self, file):
+        """
+        Function to read not malicious domain names from txt file
+        """
         with open(file, "r") as f:
             data = f.readlines()
             self.domains = [l.strip() for l in data]
             self.domains = list(dict.fromkeys(self.domains))
     
     def read_common_ips(self, file):
+        """
+        Function to read not malicious IP's from a txt file
+        """
         with open(file, "r") as f:
             data = f.readlines()
             self.ips = [l.strip() for l in data]
@@ -36,14 +41,20 @@ class Extractor:
  
 
     def _family_name(self, root):
+        "Returns family name based on the absoluth directory name"
         return root.replace(self.dir, "")
 
     def _get_iocs(self, report):
+        "Return json part of the IOC's if it exists"
         if report['targets'] != None and 'iocs' in report['targets'][0]:
             return report['targets'][0]['iocs']
         return None
 
     def _inser(self, iocs, family, cnt, ioc_type):
+        """
+        Insert IOC's into a dictionary. If it doesn't exists then create new list with one family name.
+        If it already exists just append the name of the family into the list and icrease count.
+        """
         for key, vals in iocs.items():
             if not ioc_type or key == ioc_type:
                 for val in vals:
@@ -60,6 +71,9 @@ class Extractor:
         return cnt
 
     def extract(self, one_sample, sample_name, ioc_type):
+        """
+        Main function to go through directories and files and extract all the IOC's.
+        """
         for root, dirs, files in walk(self.dir):
             cnt = 0
             family = self._family_name(root)
@@ -74,13 +88,17 @@ class Extractor:
                             cnt = self._inser(iocs, family, cnt, ioc_type)
                             self.ioc_cnt[family] = cnt
 
-    # Print overall statistics about extracted IOC's for each family
     def ioc_print(self):
+        """
+        Print overall statistics about extracted IOC's for each family
+        """
         for key, val in self.ioc_cnt.items():
             print(f"Family {key} - {val} indicators")
 
-    # Print IOC's for specific sample 
     def ioc_spec_print(self, sample, key_yes):
+        """
+        Print IOC's for specific malware sample sample 
+        """
         i = 0
         for key, val in self.ioc_map.items():
             if i == 0:
@@ -89,8 +107,10 @@ class Extractor:
             if key_yes:
                 print(key)
 
-    # Print specific type of the IOC's eg. only IP's or domains, etc.
     def only_iocs(self):
+        """
+        Print specific type of the IOC's eg. only IP's or domains, etc.
+        """
         families = []
         for key, val in self.ioc_map.items():
             if val not in families:
@@ -98,11 +118,11 @@ class Extractor:
                 families.append(val)
             print(key)
 
-    # Print IOC's for specific family
     def family_iocs(self, family):
+        """
+        Print IOC's for specific family
+        """
         for key, vals in self.ioc_map.items():
             for val in vals:
                 if val == family:
                     print(key)
-
-

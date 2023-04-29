@@ -11,9 +11,9 @@ import json
 import signal
 import os
 import threading
-from classifier import Classifier
-from extractor import Extractor
-from ml_classifier import MLClassifier
+from src.classifier import Classifier
+from src.extractor import Extractor
+from src.ml_classifier import MLClassifier
 from machine_learning import load_dataset
 from sklearn.ensemble import RandomForestClassifier
 
@@ -29,6 +29,7 @@ class Stats:
     normal = 0
     tmp_malware = 0
     tmp_normal = 0
+    flow_cnt = 1
     
     def __init__(self):
         pass
@@ -39,10 +40,12 @@ class Stats:
     def increment_malware(self):
         self.tmp_malware += 1
         self.malware += 1
+        self.flow_cnt += 1
 
     def increment_normal(self):
         self.tmp_normal += 1
         self.normal += 1 
+        self.flow_cnt += 1
 
     def reset(self):
         self.tmp_malware = 0
@@ -50,8 +53,8 @@ class Stats:
 
     def score(self):
         print("--------------------------------------")
-        print("Percentage of normal flows: ", round(((self.normal/self.log_cnt)*100),2))
-        print("Percentage of malware flows: ", round(((self.malware/self.log_cnt)*100),2))
+        print("Percentage of normal flows: ", round(((self.normal/self.flow_cnt)*100),2))
+        print("Percentage of malware flows: ", round(((self.malware/self.flow_cnt)*100),2))
         print("Number of IOC's: ")
 
 statistics = Stats()

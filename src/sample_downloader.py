@@ -11,11 +11,18 @@ from pathlib import Path
 from src.general import bcolors
 
 class SampleDownloader:
+    """
+    Class to download malware samples from abuse.ch online malware database
+    """
 
     def __init__(self, url='https://mb-api.abuse.ch/api/v1/'):
         self.url = url;
 
     def _store_sample(self, out_dir, family, res, hash256):
+        """
+        Store sample in specified directory with it's hash as name.
+        If the directory doesn't exists it will be created.
+        """
         if out_dir[-1] != '/':
             out_dir += '/'
         out_put = path.join(out_dir, family)
@@ -28,6 +35,9 @@ class SampleDownloader:
         print(bcolors.OKGREEN + "Downloaded malware sample: " + bcolors.OKBLUE + hash256+".zip" + bcolors.ENDC)
 
     def get_query(self, family, limit = 10):
+        """
+        Query limit number of malware samples for a specified family from the online database.
+        """
         data = {
             'query': 'get_siginfo',
             'signature': ''+family+'',
@@ -48,7 +58,9 @@ class SampleDownloader:
         return res_json, 0
 
     def download_samples(self, query_json, out_dir, family):
-
+        """
+        Download queried malware samples and store those samples in a directory. 
+        """
         for sample in query_json['data']:
             data = {
                 'query' : 'get_file',
@@ -64,5 +76,3 @@ class SampleDownloader:
                 return 1
             self._store_sample(out_dir, family, res, sample['sha256_hash'])
         return 0
-
-

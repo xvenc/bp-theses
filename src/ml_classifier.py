@@ -5,23 +5,9 @@ Author: Václav Korvas VUT FIT 3BIT
 Modul with class definition for preparing data from captured flow and classifing the flow 
 """
 
-import os
 import pandas as pd
 from machine_learning import data_preproccessing, split_data
 from flow_reader import SuricataParser
-
-suricata_log = "test_tmp/eve-flow.json"
-
-def tail(file_stream):
-    # Function to read last entry from log file
-    file_stream.seek(0, os.SEEK_END)
-
-    while True:
-        if file_stream.closed:
-            raise StopIteration
-
-        line = file_stream.readline()
-        yield line
 
 class MLClassifier:
     """
@@ -34,12 +20,18 @@ class MLClassifier:
         self.df = df # dataset used for training the model
 
     def train(self):
+        """
+        Preproccess all the dataset values and than train the model on the training data
+        """
         df = data_preproccessing(self.df)
         train_data, test_data, train_labels, test_labels = split_data(df)
         self.model.fit(train_data, train_labels) 
 
 
     def get_values(self, flow_record):
+        """
+        Extract all the important values from the Suricata flow record
+        """
         sur_par = SuricataParser()
         duration = sur_par.get_duration(flow_record['flow']['start'], flow_record['flow']['end'])
         app_proto = "-"
@@ -59,10 +51,15 @@ class MLClassifier:
         flow['Transmitted packets'] = flow_record['flow']['pkts_toserver']
         flow['Total bytes'] = flow['Received bytes'] + flow['Transmitted bytes']
         flow['Total packets'] = flow['Received packets'] + flow['Transmitted packets'] 
+        flow['Dst port'] = flow_record["dest_port"]
         
         return flow
 
     def prepare_values(self, flow):
+        """
+        Normalize and one-hot encode all the extracted values so they have the same 
+        range as the training data
+        """
         norm_cols = ['Duration', 'Received bytes', 'Received packets',
         'Transmitted bytes', 'Transmitted packets', 'Total bytes',
         'Total packets']
@@ -121,6 +118,10 @@ class MLClassifier:
         return flow
         
     def predict(self, flow):
+        """
+        Main function to extract the values and prepare before the model predict
+        if it is a normal or malicious flow
+        """
         if flow['event_type'] == 'flow':
             if 'app_proto' in flow:
                 if flow['app_proto'] == 'ntp':
@@ -128,7 +129,6 @@ class MLClassifier:
             flow = self.get_values(flow)
             flow = self.prepare_values(flow) 
             flow_df = pd.DataFrame(flow, index=[0,])
-            print(flow_df)
             flow_numpy = flow_df.to_numpy()
             try:
                 return self.model.predict(flow_numpy)

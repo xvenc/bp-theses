@@ -11,8 +11,10 @@ from os import listdir, path
 import getopt
 import sys
 
-# Colors for preattier output
 class bcolors:
+    """
+    Class for preattier output
+    """
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
@@ -23,8 +25,10 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-# Simple help
 def help():
+    """
+    Simple help message
+    """
     print("Usage: python3 triage_client [COMMAND] [OPTION]\n")
     print("Command:")
     print(bcolors.OKBLUE+"  --help"+ bcolors.ENDC +"\tShow this help message and exits.")
@@ -50,28 +54,36 @@ def help():
     print("\nLog and report files are automaticaly created. The file name is based on the input directory")
 
 
-# check if directory end with '/'
 def check_dir(directory):
+    """
+    Check if directory ends with "/" otherwise add "/" at the end
+    """
     if directory[-1] != '/':
         directory += '/'
     return directory
 
-# Create folder structure
 def create_folders(out_dir, malware, pcaps, reports, network):
+    """
+    Create folder structer for all pcap, malware and report files
+    """
     Path(path.join(out_dir, malware)).mkdir(parents=True, exist_ok=True)
     Path(path.join(out_dir,pcaps)).mkdir(parents=True, exist_ok=True)
     Path(path.join(out_dir,reports)).mkdir(parents=True, exist_ok=True)
     Path(path.join(out_dir,network)).mkdir(parents=True, exist_ok=True)
 
-# Create one directory with specified name
 def create_folder(directory):
+    """
+    Create directory if it doest exists
+    """
     if directory[-1] != '/':
             directory += '/'
     if not path.isdir(directory):
         Path(directory).mkdir(parents=True, exist_ok=True)
 
-# parse command line arguments
 def arg_parse():
+    """
+    Parse command line arguments and store it's values
+    """
     command = {'--submit' : False, '--download' : False, '--now' : False, 
                 '--get' : False, '--all' : False}
     option = {'-d' : [False,""], '-f' : [False,""], '-p' : [False, ""],
@@ -99,8 +111,10 @@ def arg_parse():
 
     return command,option
 
-# read lines from malware family file
 def read_lines(file):
+    """
+    Read all family names from a txt file line by line and remove all white characters
+    """
     data = list()
     if file != None:
         try:
@@ -115,11 +129,12 @@ def read_lines(file):
     data = [l.strip() for l in data]
     return data
 
-# Extract family names from log files
 def get_families_from_logs(log_dir):
+    """
+    Extract all family names from csv log file names
+    """
     family_dict = {}
     for filename in listdir(log_dir):
         family = path.splitext(filename)[0].split('_')[-1] 
         family_dict[family] = filename
     return family_dict
-

@@ -11,7 +11,9 @@ from os import walk, path
 from src.csv_writer import check_recorded, create_file_name, write_header, log
 
 class Uploader:
-
+    """
+    Class for uploading malware samples for static and dynamic analysis into triage sandbox.
+    """
     def __init__(self, triage_client, log_dir):
         self.client = triage_client
         self.logs = log_dir
@@ -21,8 +23,11 @@ class Uploader:
             directory += '/'
         return directory
 
-    # function to submit all files from a directory
     def submit_directory(self, malware_dir, client, family, report_dir, network_dir):
+        """
+        Function walk through all the malware samples in malware directory and then submit them 
+        for static and dynamic analysis into triage sandbox
+        """
         malware_dir = self._check_dir(malware_dir)
         create_folder(self.logs)
 
@@ -60,8 +65,10 @@ class Uploader:
                     print(bcolors.OKBLUE + file + bcolors.ENDC + bcolors.BOLD + " was already downloaded")
         return
 
-    # function to submit simple file using triage API
     def submit_file(self, filepath : str):
+        """
+        Function to submit simple file for static and dynamic analysis using triage API
+        """
         filename = path.basename(filepath)
         response = ""
         if path.isfile(filepath):

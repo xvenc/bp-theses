@@ -20,9 +20,11 @@ from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score, auc, roc_curve, confusion_matrix
 from sklearn.model_selection import GridSearchCV
 
-# Run using python3 random_forest.py
-
 def crossvalidation(model, data_train, labels, cv):
+    """
+    Run crossvalidation with specified number of subsets for training and validation
+    Then print the results
+    """
     score = cross_val_score(model, data_train, labels, cv=cv, scoring='accuracy', n_jobs=-1, error_score='raise') 
     print("----------------------------------------------")
     print("CROSSVALIDATION")
@@ -30,7 +32,9 @@ def crossvalidation(model, data_train, labels, cv):
     return np.mean(score)
 
 def load_dataset(path1, path2):
-    # Load normal and malicious datasets 
+    """
+    Load normal and malicious datasets 
+    """
     df_normal = pd.read_csv(path1)
     df_malware = pd.read_csv(path2)
     # Append them together
@@ -38,6 +42,10 @@ def load_dataset(path1, path2):
     return df
 
 def data_preproccessing(df : pd.DataFrame):
+    """
+    Preproccess the values in the dataset into a range 0-1.
+    And one-hot encode the categorical values
+    """
     # Specify which columns to use for our model
     cols = ['Duration', 'Received bytes','Received packets'
     ,'Transmitted bytes', 'Transmitted packets', 'Protocol', 
@@ -70,6 +78,10 @@ def data_preproccessing(df : pd.DataFrame):
     return df
 
 def split_data(df : pd.DataFrame):
+    """
+    Split data into traning and testing part.
+    And extract the labels into separate parts
+    """
     # Extract labels which are the values we want to predict
     # And remove them from the dataframe
     labels = np.array(df['label'])
@@ -85,22 +97,24 @@ def split_data(df : pd.DataFrame):
     train_data, test_data, train_labels, test_labels = train_test_split(data, 
                                         labels, test_size = 0.25)
 
-    print("----------------------------------------------")
-    print("DATA SHAPE")
-    print('Training Features Shape:', train_data.shape)
-    print('Training Labels Shape:', train_labels.shape)
-    print('Testing Features Shape:', test_data.shape)
-    print('Testing Labels Shape:', test_labels.shape)
-    print("----------------------------------------------")
-    print("Normal data training: ", np.size(train_labels) - np.count_nonzero(train_labels))
-    print("Malware data training: ", np.count_nonzero(train_labels))
-    print("Normal data testing: ", np.size(test_labels) - np.count_nonzero(test_labels))
-    print("Malware data testing: ", np.count_nonzero(test_labels))
+    #print("----------------------------------------------")
+    #print("DATA SHAPE")
+    #print('Training Features Shape:', train_data.shape)
+    #print('Training Labels Shape:', train_labels.shape)
+    #print('Testing Features Shape:', test_data.shape)
+    #print('Testing Labels Shape:', test_labels.shape)
+    #print("----------------------------------------------")
+    #print("Normal data training: ", np.size(train_labels) - np.count_nonzero(train_labels))
+    #print("Malware data training: ", np.count_nonzero(train_labels))
+    #print("Normal data testing: ", np.size(test_labels) - np.count_nonzero(test_labels))
+    #print("Malware data testing: ", np.count_nonzero(test_labels))
 
     return train_data, test_data, train_labels, test_labels
 
-
 def cross_validation(model, train_data, train_labels):
+    """
+    Run 5, 10 and 15 cross validation on given model
+    """
     results = {}
     # Crosvalidation with K-Folds 15, 10 and 5
     results['score15'] = crossvalidation(model, train_data, train_labels, 15)
@@ -109,55 +123,54 @@ def cross_validation(model, train_data, train_labels):
 
     return results
 
-
 def params(train_data, train_labels, model, param_grid):
-
+    """
+    Find the best parametrs for given model based on the param_grid 
+    """
     grid_search = GridSearchCV(estimator=model,param_grid=param_grid,cv=15,n_jobs=-1, verbose=2)
     grid_search.fit(train_data, train_labels)
 
     print(grid_search.best_params_)
 
-def boxplot_dataframe(df : pd.DataFrame):
-    num_list = ['Duration', 'Received bytes', 'Received packets',
-               'Transmitted bytes', 'Transmitted packets', 'Total bytes',
-                'Total packets'] 
-    
-    fig = plt.figure(figsize=(15,30))
-
-    for i in range(len(num_list)):
-        column = num_list[i]
-        sub = fig.add_subplot(3, 3, i + 1)
-        sns.boxplot(x='label', y=column, data=df)
-        plt.show()
-
 def confusion_matrix_graph(cm_list, model_list, show):
+    """
+    Show confusion matrix as a heat map graph for all models
+    """
     fig = plt.figure(figsize=(12,20))
     for i in range(len(cm_list)):
         cm = cm_list[i]
         model = model_list[i]
         sub = fig.add_subplot(3,2,i+1).set_title(model)
         cm_plot = sns.heatmap(cm, annot=True, cmap='Blues_r', fmt="d")
-        cm_plot.set_xlabel('Predicted Values')
-        cm_plot.set_ylabel('Acctual Values')
+        cm_plot.set_xlabel('Predikované hodnoty')
+        cm_plot.set_ylabel('Skutečné hodnoty')
+        cm_plot.tick_params(labelsize=13)
     
     plt.savefig("img/matrixes.png", bbox_inches='tight')
     if show:
         plt.show()
 
 def accuracy_graph(df, show):
+    """
+    Show the accuracy of all the models in one bar graph
+    """
     ## Show the results of each classifier in the graph
     result_df = df.sort_values('Accuracy', ascending=False)
     sns.set_style('darkgrid')
     fig, ax = plt.subplots(figsize=(18, 10))
-    sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
-
+    b = sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
+    b.set_xlabel("Algoritmus", fontsize=15)
+    b.set_ylabel("Přesnost", fontsize=15)
+    b.tick_params(labelsize=13)
     plt.savefig("img/result.png", bbox_inches='tight')
     if show:
         plt.show()
 
 
 def perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels):
-
+    """
+    Validate the models on test data and than calculate all the success metrics
+    """
     auc_list = []
     acc_list = []
     cm_list = []

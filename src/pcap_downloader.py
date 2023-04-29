@@ -14,6 +14,9 @@ import time
 import csv
 
 class Downloader:
+    """
+    Class to download pcap files and all reports from triage online sandbox
+    """
 
     def __init__(self, url : str, auth_token : str, client):
         self.url = url
@@ -21,6 +24,9 @@ class Downloader:
         self.client = client
 
     def _download_pcap(self, sample_id, taksk_id, output_dir, filename, num):
+        """
+        Download pcap file for specified malware sample and specified analysis and store it in pcap folder
+        """
         s = Session()
         headers = {'Authorization': 'Bearer {0}'.format(self.token)}
         try:
@@ -37,8 +43,10 @@ class Downloader:
                     wf.write(data)
         return True
 
-    # Function to download overview report of the analysis
     def _get_overview_report(self, sample_id, report_dir, report_file):
+        """
+        Function to download overview report of the analysis and store it in the report directory
+        """
         try:
             report = self.client.overview_report(sample_id)
         except:
@@ -48,6 +56,9 @@ class Downloader:
         create_report(report, report_file, report_dir)
 
     def _get_network_report(self, sample_id, report_dir, report_file, report_type):
+        """
+        Download report for specified dynamic analysis and store it in the network report directory
+        """
         try:
             # Get task report from behavioral1 analysis(windows7 analysis)
             net_report = self.client.task_report(sample_id, report_type)
@@ -57,6 +68,10 @@ class Downloader:
         create_report(net_report, report_file, report_dir)
 
     def download_from_report(self, data, outpud_dir, filename):
+        """
+        Download pcap file from dynamic analysis
+        Downloading file from overview report file
+        """
         try:
             res = self._download_pcap(data['sample']['id'], "behavioral1",
                                       outpud_dir, filename, "1")
@@ -68,6 +83,10 @@ class Downloader:
             bcolors.OKBLUE+ "{0}".format(filename) + bcolors.ENDC)
 
     def download_from_csv(self, csv, task_id, outpud_dir, num):
+        """
+        Download pcap file of specified dynamic analysis.
+        Downloading is done from csv log file
+        """
         for row in csv:
             try:
                 res = self._download_pcap(row['Sample_id'], task_id, 
@@ -81,13 +100,19 @@ class Downloader:
                 bcolors.OKBLUE+ "{0}".format(row['Filename']) + bcolors.ENDC)
 
     def download_sample(self, sample_id, task_id, outpud_dir, filename, num):
+        """
+        Download pcap file of specified dynamci analysis and check the return code
+        """
         res  = self._download_pcap(sample_id, task_id, outpud_dir, filename, num)
         if res:
             print(bcolors.OKGREEN + "Downloaded pcap for " + bcolors.OKBLUE + 
                     "{0}".format(filename) + bcolors.ENDC)
 
-    # function to wait for the analysis to be done and then download the pcap
     def _download_wait(self, sample_id, filename, pcap_dir, family, report_dir, network_dir):
+        """
+        Function to wait for the dynamic analysis to be done and then download the pcap, overview report
+        and report for each individual dynamic analysis.
+        """
         while True:
             try:
                 status = self.client.sample_by_id(sample_id)['status']
@@ -118,6 +143,10 @@ class Downloader:
 
     def download_samples_for_directory(self, directory, family, family_dict, 
                                             report_dir, log_dir, pcap_dir, network_dir):
+        """
+        Recursively iterate through all directories and download all pcap and reports
+        for each individual malware sample and store it
+        """
         malware_dir = check_dir(directory)
         for root, dirs, files in walk(path.join(malware_dir, family)):
             # check if directory contain files, not only other directories
