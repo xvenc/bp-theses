@@ -6,6 +6,8 @@ Modul with comparasion of various machine learning algorithms on the same datase
 """
 
 import numpy as np
+import getopt
+import sys
 import pandas as pd
 import seaborn as sns
 from matplotlib import pyplot as plt
@@ -19,6 +21,39 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.metrics import f1_score, auc, roc_curve, confusion_matrix
 from sklearn.model_selection import GridSearchCV
+
+
+def help_msg():
+    print("Usage: python3 machine_learning.py [COMMAND]\n")
+    print("Command:") 
+    print("\t--help\tShow this help message.")
+    print("\t-m\tPath to csv malware dataset file.")
+    print('\t-n\tPath to csv normal dataset file.')
+
+def argparse():
+    """
+    Function to parse command line arguments
+    """
+    arguments = {'-n' : [False, ""], '-m' : [False, ""]}
+
+    try:
+        options, args = getopt.getopt(sys.argv[1:], "n:m:", ["help"])
+    except:
+        help_msg()    
+        sys.exit(1)
+
+    for opt, arg in options:
+        if opt == "--help":
+            help_msg()
+            sys.exit(0)
+        elif opt in arguments:
+            arguments[opt][0] = True
+            arguments[opt][1] = arg
+    if not arguments['-m'][0] or not arguments['-n'][0]:
+        help_msg()
+        sys.exit(1)
+
+    return arguments
 
 def crossvalidation(model, data_train, labels, cv):
     """
@@ -224,7 +259,9 @@ def perform(model_pipeline, model_list, train_data, train_labels, test_data, tes
 
 if __name__ == "__main__":
 
-    df = load_dataset('dataset.csv', 'dataset2.csv')
+    arg = argparse()
+
+    df = load_dataset(arg['-m'][1], arg['-n'][1])
     df = data_preproccessing(df)
     train_data, test_data, train_labels, test_labels = split_data(df)
 
