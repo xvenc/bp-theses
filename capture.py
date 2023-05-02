@@ -13,6 +13,7 @@ import os
 import threading
 from src.classifier import Classifier
 from src.extractor import Extractor
+from src.stats import Stats
 from src.ml_classifier import MLClassifier
 from machine_learning import load_dataset
 from sklearn.ensemble import RandomForestClassifier
@@ -21,41 +22,6 @@ suricata_log = "/var/log/suricata/all.json"
 normal_dataset = "dataset2.csv"
 malware_dataset = "dataset.csv"
 
-
-class Stats:
-
-    log_cnt = 0
-    malware = 0
-    normal = 0
-    tmp_malware = 0
-    tmp_normal = 0
-    flow_cnt = 1
-    
-    def __init__(self):
-        pass
-
-    def inc_log_cnt(self):
-        self.log_cnt += 1
-
-    def increment_malware(self):
-        self.tmp_malware += 1
-        self.malware += 1
-        self.flow_cnt += 1
-
-    def increment_normal(self):
-        self.tmp_normal += 1
-        self.normal += 1 
-        self.flow_cnt += 1
-
-    def reset(self):
-        self.tmp_malware = 0
-        self.tmp_normal = 0
-
-    def score(self):
-        print("--------------------------------------")
-        print("Percentage of normal flows: ", round(((self.normal/self.flow_cnt)*100),2))
-        print("Percentage of malware flows: ", round(((self.malware/self.flow_cnt)*100),2))
-        print("Number of IOC's: ")
 
 statistics = Stats()
 
@@ -66,7 +32,7 @@ def argparse():
     # -t for found specific types of IOC's
     arguments = {'-d' : [False, ""], '-m' : [False, ""], \
                  '-t' : [False, None]}
-    commands = {'--live' : False}
+    commands = {'--verbose' : False}
 
     try:
         options, args = getopt.getopt(sys.argv[1:], "d:m:t:", ["help", "live"])
@@ -82,23 +48,23 @@ def argparse():
         elif opt in arguments:
             arguments[opt][0] = True
             arguments[opt][1] = arg
-            if arguments['-t'][0] and arguments['-t'][1] not in ['domains', 'ips', 'urls']:
-                print(arg)
-                print("Wrong argument option for argument -t")
-                sys.exit(1)
         elif opt in commands:
             commands[opt] = True
 
     return arguments, commands
 
-# Function to handle SIGINT and exit with 0 and print overall statistics
 def handler(signum, frame):
+    """
+    Function to handle SIGINT and exit with 0 and print overall statistics
+    """
     print("\n")
     statistics.score()
     sys.exit(0)
 
-# Function to read last entry from log file
 def tail(file_stream):
+    """
+    Function to read last entry from log file
+    """
     file_stream.seek(0, os.SEEK_END)
 
     while True:
@@ -109,6 +75,9 @@ def tail(file_stream):
         yield line
 
 def stats(statistics):
+    """
+    Function that is started separate thread and print statistics about proccessed log records
+    """
     threading.Timer(30, stats, args=[statistics],).start()
     print("\nNormal: ",statistics.tmp_normal)
     print("Malicious: ", statistics.tmp_malware)
@@ -116,8 +85,10 @@ def stats(statistics):
     print("\n")
     statistics.reset()
 
-def live_caputure(log_file, ioc_classifier, ml_classifier):
-    found_ioc = []
+def live_caputure(log_file, ioc_classifier, ml_classifier, cmds):
+    """
+    Function to read last record from file and proccess it
+    """
     stats(statistics)
     for record in tail(open(log_file, 'r')):
         try:
@@ -136,24 +107,23 @@ def live_caputure(log_file, ioc_classifier, ml_classifier):
 
         if predicted == 1:
             statistics.increment_malware()
-            print(f"Malicious number {statistics.malware} with src IP: {json_obj['src_ip']}:{json_obj['src_port']} and dst IP: {json_obj['dest_ip']}:{json_obj['dest_port']}")
+            if cmds['--verbose']:
+                print(f"Malicious number {statistics.malware} with src IP: {json_obj['src_ip']}:{json_obj['src_port']} and dst IP: {json_obj['dest_ip']}:{json_obj['dest_port']}")
         elif predicted == 0:
             statistics.increment_normal()
-            print("Normal ", statistics.normal)
+            if cmds['--verbose']:
+                print("Normal ", statistics.normal)
         
         if ioc in ioc_classifier.iocs:
-            print("Found ioc: ", ioc)
-            found_ioc.append(ioc)
+            if cmds['--verbose']:
+                print("Found ioc: ", ioc)
+            statistics.add_ioc(ioc)
         
-        if ip_match != None:
-            print("Found ip: ", ip_match)
-            found_ioc.append(ioc)
+        if ip_match != None and predicted == 1:
+            if cmds['--verbose']:
+                print("Found IOC ip adress and flow was detected as malicious: ", ip_match, f"flow: {json_obj['src_ip']}:{json_obj['src_port']}->{json_obj['dest_ip']}:{json_obj['dest_port']}")
+            statistics.add_ioc(ip_match)
 
-    res = [*set(found_ioc)]
-    #print("Normal: ", )
-    #print("Malicious: ", malicious)
-    #print("All: ", log_cnt)
-    #print("Found IOCS: ", res)
 
 # MAIN
 if __name__ == "__main__":
@@ -170,19 +140,6 @@ if __name__ == "__main__":
     classifier.init_counter() # Init counters for each family
     ml_classifier.train() # Train model
 
-    i = 0
-    while True and cmds['--live']:
-        # Live capture from Suricata log file
-        if i == 0:
-            print("\n\nLive capture started")
-            i += 1
-        live_caputure(suricata_log, classifier, ml_classifier)
-
-    # Print statistics about families and found IOC's
-    if args['-m'][0]:
-        extractor.ioc_spec_print(args['-m'][1], True)
-    elif args['-t'][0]:
-        extractor.only_iocs()
-    else:
-        extractor.ioc_print()
-        #extractor.family_iocs("smokeloader")
+    # Live capture from Suricata log file
+    print("\n\nLive capture started")
+    live_caputure(suricata_log, classifier, ml_classifier, cmds)

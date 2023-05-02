@@ -7,7 +7,7 @@ Modul with definition of class for extracting malware flows from triage report f
 
 import json
 from os import walk, path
-from flow import Flow
+from src.flow import Flow
 import csv
 
 class FlowReader:
@@ -16,6 +16,8 @@ class FlowReader:
     """
     update = 0
     create = 0
+    dns_cnt = 0
+    normal_cnt = 0
 
     def __init__(self):
         # The key to the dict is composed of 5 features
@@ -111,6 +113,10 @@ class FlowReader:
 
         if domain in self.domains or app_proto == 'dns':
             label = "Normal"
+            self.normal_cnt += 1
+        
+        if app_proto == 'dns':
+            self.dns_cnt += 1
         
         if label == "Normal":
             family = "-"
@@ -154,9 +160,9 @@ class FlowReader:
                 with open(path.join(root, filename)) as j_file:
                     report = json.load(j_file)
                     if report['network']:
-                        #print(root+"/"+filename)
                         self._extract_flow(report['network'], label, family)
 
+        print("Malware flows") 
         print("Updated: ", self.update)
         print("Created: ", self.create)
 

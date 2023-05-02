@@ -8,7 +8,7 @@ Modul with definition of class for extracting flows from Suricata log file and c
 import json
 import csv
 from datetime import datetime
-from flow import Flow
+from src.flow import Flow
 
 class SuricataParser:
     """
@@ -99,7 +99,7 @@ class SuricataParser:
             flow = json.loads(record)
             if flow['proto'] in ['UDP', 'TCP']:
                 self._extract_features(flow)
-        
+        print("Normal flows") 
         print("Updated: ", self.update)
         print("Created: ", self.create)
 

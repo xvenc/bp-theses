@@ -181,7 +181,7 @@ def confusion_matrix_graph(cm_list, model_list, show):
         cm_plot.set_ylabel('Skutečné hodnoty')
         cm_plot.tick_params(labelsize=13)
     
-    plt.savefig("img/matrixes.png", bbox_inches='tight')
+    plt.savefig("img/matrixes.pdf", bbox_inches='tight')
     if show:
         plt.show()
 
@@ -197,7 +197,7 @@ def accuracy_graph(df, show):
     b.set_xlabel("Algoritmus", fontsize=15)
     b.set_ylabel("Přesnost", fontsize=15)
     b.tick_params(labelsize=13)
-    plt.savefig("img/result.png", bbox_inches='tight')
+    plt.savefig("img/result.pdf", bbox_inches='tight')
     if show:
         plt.show()
 
@@ -300,6 +300,6 @@ if __name__ == "__main__":
     #params(train_data, train_labels, xgb, param_grid)
 
     print("\n---------------NEW PARAMS----------------")
-    perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels)
+    #perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels)
     print("\n---------------OLD PARAMS----------------\n")
     perform(normal_models, normal_list, train_data, train_labels, test_data, test_labels) 
