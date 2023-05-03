@@ -25,25 +25,32 @@ malware_dataset = "dataset.csv"
 
 statistics = Stats()
 
-# Function to parse command line arguments
+def help_msg():
+    print("Usage: python3 capture.py [COMMAND]\n")
+    print("Command:") 
+    print("\t--help\tShow this help message.")
+    print("\t-d\tPath to the folder with all reports containing all captured IOC's.")
+    print('\t-t\tTime (in minutes) in which the results of classification will be printed to screen periodicaly (default is 3 minutes).')
+    print('\t--verbose\tTo print every classified flow to terminal.')
+
 def argparse():
+    """
+    Function to parse command line arguments
+    """
     # -d for folder to extract from
-    # -m for one specific malware sample
-    # -t for found specific types of IOC's
-    arguments = {'-d' : [False, ""], '-m' : [False, ""], \
-                 '-t' : [False, None]}
+    # -t for time 
+    arguments = {'-d' : [False, ""], '-t' : [False, 3]}
     commands = {'--verbose' : False}
 
     try:
         options, args = getopt.getopt(sys.argv[1:], "d:m:t:", ["help", "verbose"])
     except:
-        # help()
-        print("Error")
+        help_msg()
         sys.exit(1)
 
     for opt, arg in options:
         if opt == "--help":
-            print("HELP")
+            help_msg()
             sys.exit(0)
         elif opt in arguments:
             arguments[opt][0] = True
@@ -78,7 +85,7 @@ def stats(statistics):
     """
     Function that is started separate thread and print statistics about proccessed log records
     """
-    threading.Timer(30, stats, args=[statistics],).start()
+    threading.Timer(60*int(args['-t'][1]), stats, args=[statistics],).start()
     print("\nNormal flows: ",statistics.tmp_normal)
     print("Malicious flows: ", statistics.tmp_malware)
     print("All log recors: ", statistics.log_cnt)
@@ -108,11 +115,11 @@ def live_caputure(log_file, ioc_classifier, ml_classifier, cmds):
         if predicted == 1:
             statistics.increment_malware()
             if cmds['--verbose']:
-                print(f"Malicious number {statistics.malware} with src IP: {json_obj['src_ip']}:{json_obj['src_port']} and dst IP: {json_obj['dest_ip']}:{json_obj['dest_port']}")
+                print(f"Malicious flow number {statistics.malware} with src IP: {json_obj['src_ip']}:{json_obj['src_port']} and dst IP: {json_obj['dest_ip']}:{json_obj['dest_port']}")
         elif predicted == 0:
             statistics.increment_normal()
             if cmds['--verbose']:
-                print("Normal ", statistics.normal)
+                print("Normal flow number: ", statistics.normal)
         
         if ioc in ioc_classifier.iocs:
             if cmds['--verbose']:
@@ -126,8 +133,8 @@ def live_caputure(log_file, ioc_classifier, ml_classifier, cmds):
 
 
 # MAIN
+args, cmds = argparse() # Needs to be global because of the threading
 if __name__ == "__main__":
-    args, cmds = argparse()
     extractor = Extractor()
     extractor.read_common_domains("common.txt")
     extractor.read_common_ips("common_ips.txt")

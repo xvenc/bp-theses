@@ -44,6 +44,9 @@ Then just turn off the suricata deamon using command:
 ```
 sudo systemctl stop suricata.service
 ```
+
+Then in config file `suricata.yaml` on line 19 you need to change the range of IP adresses you want to capture on. Default is 192.168.1.0/24.
+
 And then launch suricata from terminal using command (with the name of the interface you want to caputre on):
 ```
 sudo suricata -c xkorva03_thesis/suricata.yaml -i <interface name> 
@@ -224,7 +227,8 @@ $ python3 dataset_creator.py -d /out/network/ -f all.json -o datasets/
 
 ### **capture.py**
 
-Script that reads last record from Suricata log file and check if it contains any IOC's or if the flows in some time period were malicious and how many.
+Script that reads last record from Suricata log file and check if it contains any IOC's or if the flows in some time period were malicious and how many. It runs in infinite loop, so it can be only stopped by pressing CTRL+C twice. Twice because both threads needs to be killed.
+If the capture wont work, it's maybe because you have log files somewhere else then default `/var/log/suricata/all.json`. So you need to change this to you location of log files. It's on line 21 in the file `capture.py`. 
 
 ```
 Usage: python3 capture.py [COMMAND]
@@ -232,14 +236,14 @@ Usage: python3 capture.py [COMMAND]
 Commands:
     --help          Show this help message and exists.
     -d              Path to the folder with all reports containing all captured IOC's.
-    -t              Time in which the results of classification will be printed to screen periodicaly (default is 3 minutes). 
+    -t              Time (in minutes) in which the results of classification will be printed to screen periodicaly (default is 3 minutes). 
     --verbose       To print every classified flow to terminal.
 ```
 
 #### Example
 
 ```
-$ python3 capture.py -d /out/reports/ 
+$ python3 capture.py -d /out/reports/ --verbose -t 1
 ```
 
 ## Archive structure
@@ -258,6 +262,7 @@ $ python3 capture.py -d /out/reports/
 * src/report.py
 * src/sample_downloader.py
 * src/sample_uploader.py
+* src/stats.py
 * src/suricata_flows.py
 * example_family.txt
 * README.md 

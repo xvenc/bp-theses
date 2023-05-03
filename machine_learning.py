@@ -300,6 +300,6 @@ if __name__ == "__main__":
     #params(train_data, train_labels, xgb, param_grid)
 
     print("\n---------------NEW PARAMS----------------")
-    #perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels)
+    perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels)
     print("\n---------------OLD PARAMS----------------\n")
     perform(normal_models, normal_list, train_data, train_labels, test_data, test_labels) 

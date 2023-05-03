@@ -51,7 +51,7 @@ class MLClassifier:
         flow['Transmitted packets'] = flow_record['flow']['pkts_toserver']
         flow['Total bytes'] = flow['Received bytes'] + flow['Transmitted bytes']
         flow['Total packets'] = flow['Received packets'] + flow['Transmitted packets'] 
-        flow['Dst port'] = flow_record["dest_port"]
+        #flow['Dst port'] = flow_record["dest_port"]
         
         return flow
 
