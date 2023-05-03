@@ -7,7 +7,7 @@ Modul with class definition for preparing data from captured flow and classifing
 
 import pandas as pd
 from machine_learning import data_preproccessing, split_data
-from flow_reader import SuricataParser
+from src.suricata_flows import SuricataParser
 
 class MLClassifier:
     """
