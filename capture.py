@@ -35,7 +35,7 @@ def argparse():
     commands = {'--verbose' : False}
 
     try:
-        options, args = getopt.getopt(sys.argv[1:], "d:m:t:", ["help", "live"])
+        options, args = getopt.getopt(sys.argv[1:], "d:m:t:", ["help", "verbose"])
     except:
         # help()
         print("Error")
@@ -79,9 +79,9 @@ def stats(statistics):
     Function that is started separate thread and print statistics about proccessed log records
     """
     threading.Timer(30, stats, args=[statistics],).start()
-    print("\nNormal: ",statistics.tmp_normal)
-    print("Malicious: ", statistics.tmp_malware)
-    print("All: ", statistics.log_cnt)
+    print("\nNormal flows: ",statistics.tmp_normal)
+    print("Malicious flows: ", statistics.tmp_malware)
+    print("All log recors: ", statistics.log_cnt)
     print("\n")
     statistics.reset()
 
