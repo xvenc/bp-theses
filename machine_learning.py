@@ -96,6 +96,8 @@ def data_preproccessing(df : pd.DataFrame):
     #df['Port'] = df['Dst port']
     # Remove unwanted application protocol
     df = df[df['Application protocol'] != 'ntp']
+    # Remove flows with negative duration
+    df = df[df['Duration'] != -1]
 
     # Find the biggest number in the column and divide the rest of the
     # values with it
