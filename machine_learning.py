@@ -196,9 +196,9 @@ def accuracy_graph(df, show):
     sns.set_style('darkgrid')
     fig, ax = plt.subplots(figsize=(18, 10))
     b = sns.barplot(data=result_df, x='Algorithm', y='Accuracy', ax=ax)
-    b.set_xlabel("Algoritmus", fontsize=15)
-    b.set_ylabel("Přesnost", fontsize=15)
-    b.tick_params(labelsize=13)
+    b.set_xlabel("Algoritmus", fontsize=17)
+    b.set_ylabel("Přesnost", fontsize=17)
+    b.tick_params(labelsize=17)
     plt.savefig("img/result.pdf", bbox_inches='tight')
     if show:
         plt.show()
@@ -269,7 +269,7 @@ if __name__ == "__main__":
 
     # Instantiate all the models
     # n_estimators=50, max_depth=130, min_samples_leaf=1, min_samples_split=3, oob_score=True
-    model_list = ['Random Forest','Random Forest', 'Xgboost', 'Xgboost']
+    model_list = ['Random Forest 1','Random Forest 2', 'Xgboost 1', 'Xgboost 2']
     model_pipeline = []
     #model_pipeline.append(RandomForestClassifier(n_estimators=80, max_depth=130, min_samples_leaf=1, min_samples_split=2, oob_score=False))
     model_pipeline.append(RandomForestClassifier(n_estimators=40, max_depth=130, min_samples_leaf=1, min_samples_split=2, oob_score=True))
