@@ -75,5 +75,5 @@ class Uploader:
             try:
                 response = self.client.submit_sample_file(filename, open(filepath, 'rb'), False, None, 'infected')
             except:
-                print(bcolors.FAIL + "Error: Couldnt sent http request")
+                print(bcolors.FAIL + "Error: Couldnt sent http request" + bcolors.ENDC)
         return response
