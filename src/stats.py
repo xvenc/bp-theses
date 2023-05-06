@@ -15,7 +15,7 @@ class Stats:
     normal = 0 # Overall number of classified normal flows
     tmp_malware = 0 # Number of classified malware flows during period of time
     tmp_normal = 0 # Number of classified normal flows during period of time
-    flow_cnt = 1 # Number of proccessed flows
+    flow_cnt = 0 # Number of proccessed flows
     found_ioc = [] # List of found iocs
     
     def __init__(self):
@@ -62,8 +62,13 @@ class Stats:
         """
         Print overall score about classification and found IOC's
         """
+        norm = 0
+        malw = 0
+        if self.flow_cnt != 0:
+            norm = round(((self.normal/self.flow_cnt)*100),2)
+            malw = round(((self.malware/self.flow_cnt)*100),2)
         print("--------------------------------------")
-        print("Percentage of normal flows: ", round(((self.normal/self.flow_cnt)*100),2))
-        print("Percentage of malware flows: ", round(((self.malware/self.flow_cnt)*100),2))
+        print("Percentage of normal flows: ", norm, " %")
+        print("Percentage of malware flows: ", malw, " %")
         print("Number of IOC's: ", len(self.found_ioc))
 

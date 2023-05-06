@@ -179,9 +179,9 @@ def confusion_matrix_graph(cm_list, model_list, show):
         model = model_list[i]
         sub = fig.add_subplot(3,2,i+1).set_title(model)
         cm_plot = sns.heatmap(cm, annot=True, cmap='Blues_r', fmt="d")
-        cm_plot.set_xlabel('Predikované hodnoty')
-        cm_plot.set_ylabel('Skutečné hodnoty')
-        cm_plot.tick_params(labelsize=13)
+        cm_plot.set_xlabel('Predikované hodnoty', fontsize=17)
+        cm_plot.set_ylabel('Skutečné hodnoty', fontsize=17)
+        cm_plot.tick_params(labelsize=17)
     
     plt.savefig("img/matrixes.pdf", bbox_inches='tight')
     if show:

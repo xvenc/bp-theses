@@ -38,7 +38,13 @@ python3 machine_learning.py
 ``` 
 This will print on the terminal all scores like accuracy, false positivity rate, F1-score etc. 
 
-If you want to start a live capture and classification, you need to install Suricata tool first. The guide for instalation is described here [https://suricata.readthedocs.io/en/suricata-6.0.0/install.html](https://suricata.readthedocs.io/en/suricata-6.0.0/install.html). 
+If you want to start a live capture and classification, you need to install Suricata tool first. The guide for instalation is described here [https://suricata.readthedocs.io/en/suricata-6.0.0/quickstart.html](https://suricata.readthedocs.io/en/suricata-6.0.0/quickstart.html).
+But basically if you are using Ubuntu distribution just run these 3 comands:
+```
+sudo add-apt-repository ppa:oisf/suricata-stable
+sudo apt update
+sudo apt install suricata jq
+```
 
 Then just turn off the suricata deamon using command: 
 ```
@@ -49,7 +55,7 @@ Then in config file `suricata.yaml` on line 19 you need to change the range of I
 
 And then launch suricata from terminal using command (with the name of the interface you want to caputre on):
 ```
-sudo suricata -c xkorva03_thesis/suricata.yaml -i <interface name> 
+sudo suricata -c suricata.yaml -i <interface name> 
 ```
 Then just run 
 ```

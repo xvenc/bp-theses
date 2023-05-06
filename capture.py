@@ -88,7 +88,8 @@ def stats(statistics):
     threading.Timer(60*int(args['-t'][1]), stats, args=[statistics],).start()
     print("\nNormal flows: ",statistics.tmp_normal)
     print("Malicious flows: ", statistics.tmp_malware)
-    print("All log recors: ", statistics.log_cnt)
+    print("All log records: ", statistics.log_cnt)
+    print("Flow records: ", statistics.flow_cnt)
     print("\n")
     statistics.reset()
 
