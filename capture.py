@@ -19,8 +19,8 @@ from machine_learning import load_dataset
 from sklearn.ensemble import RandomForestClassifier
 
 suricata_log = "/var/log/suricata/all.json"
-normal_dataset = "dataset2.csv"
-malware_dataset = "dataset.csv"
+normal_dataset = "normal_dataset.csv"
+malware_dataset = "malware_dataset.csv"
 
 
 statistics = Stats()
@@ -136,10 +136,11 @@ def live_caputure(log_file, ioc_classifier, ml_classifier, cmds):
 # MAIN
 args, cmds = argparse() # Needs to be global because of the threading
 if __name__ == "__main__":
-    extractor = Extractor()
+    extractor = Extractor(args['-d'][1])
     extractor.read_common_domains("common.txt")
     extractor.read_common_ips("common_ips.txt")
-    extractor.extract(False, "", args['-t'][1]) # Extract ioc's from the report files
+    extractor.extract(False, "", "") # Extract ioc's from the report files
+
     classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt) # Classifier to classifi if DNS, TLS or HTTP containe IOC's
     ml_classifier = MLClassifier(RandomForestClassifier(n_estimators=50, max_depth=140, min_samples_leaf=1, min_samples_split=2, oob_score=False),
                                 load_dataset(normal_dataset, malware_dataset))
@@ -148,6 +149,7 @@ if __name__ == "__main__":
     classifier.init_counter() # Init counters for each family
     ml_classifier.train() # Train model
 
+    extractor.ioc_print()
     # Live capture from Suricata log file
     print("\n\nLive capture started")
     live_caputure(suricata_log, classifier, ml_classifier, cmds)

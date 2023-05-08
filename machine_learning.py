@@ -179,11 +179,13 @@ def confusion_matrix_graph(cm_list, model_list, show):
         model = model_list[i]
         sub = fig.add_subplot(3,2,i+1).set_title(model)
         cm_plot = sns.heatmap(cm, annot=True, cmap='Blues_r', fmt="d")
-        cm_plot.set_xlabel('Predikované hodnoty', fontsize=17)
-        cm_plot.set_ylabel('Skutečné hodnoty', fontsize=17)
-        cm_plot.tick_params(labelsize=17)
+        if i == 0 or i == 2 or i == 4:
+            cm_plot.set_ylabel('Skutečné hodnoty', fontsize=13)
+        if i == 5 or i == 4:
+            cm_plot.set_xlabel('Predikované hodnoty', fontsize=13)
+        cm_plot.tick_params(labelsize=13)
     
-    plt.savefig("img/matrixes.pdf", bbox_inches='tight')
+    #plt.savefig("img/matrixes.pdf", bbox_inches='tight')
     if show:
         plt.show()
 
@@ -199,7 +201,7 @@ def accuracy_graph(df, show):
     b.set_xlabel("Algoritmus", fontsize=17)
     b.set_ylabel("Přesnost", fontsize=17)
     b.tick_params(labelsize=17)
-    plt.savefig("img/result.pdf", bbox_inches='tight')
+    #plt.savefig("img/result.pdf", bbox_inches='tight')
     if show:
         plt.show()
 
@@ -253,10 +255,10 @@ def perform(model_pipeline, model_list, train_data, train_labels, test_data, tes
     result_df['Accuracy'] = acc_list
 
     # Show accuracy graph of each model
-    #accuracy_graph(result_df, False)
+    accuracy_graph(result_df, True)
 
     # Print confusion matrix graph
-    #confusion_matrix_graph(cm_list, model_list, False)
+    confusion_matrix_graph(cm_list, model_list, True)
 
 
 if __name__ == "__main__":
@@ -290,16 +292,6 @@ if __name__ == "__main__":
     normal_models.append(GaussianNB())
     normal_models.append(SVC())
     normal_models.append(XGBClassifier())
-
-    rf = RandomForestClassifier()
-    xgb = XGBClassifier()
-    param_grid = {
-        'n_estimators' : [60, 50, 40, 120 ,80, 100, 150],
-        'max_depth' : [10,20,30,18],
-        'subsample' : [0.8,1, 2],
-        'learning_rate' : [0.1,0.2, 0.3]
-    }
-    #params(train_data, train_labels, xgb, param_grid)
 
     print("\n---------------NEW PARAMS----------------")
     perform(model_pipeline, model_list, train_data, train_labels, test_data, test_labels)
