@@ -162,9 +162,9 @@ class FlowReader:
                     if report['network']:
                         self._extract_flow(report['network'], label, family)
 
-        print("Malware flows") 
-        print("Updated: ", self.update)
-        print("Created: ", self.create)
+        #print("Malware flows") 
+        #print("Updated: ", self.update)
+        #print("Created: ", self.create)
 
     def create_row(self, key, items):
         """

@@ -142,8 +142,7 @@ if __name__ == "__main__":
     extractor.extract(False, "", "") # Extract ioc's from the report files
 
     classifier = Classifier(extractor.ioc_map, extractor.ioc_cnt) # Classifier to classifi if DNS, TLS or HTTP containe IOC's
-    ml_classifier = MLClassifier(RandomForestClassifier(n_estimators=50, max_depth=140, min_samples_leaf=1, min_samples_split=2, oob_score=False),
-                                load_dataset(normal_dataset, malware_dataset))
+    ml_classifier = MLClassifier(RandomForestClassifier(), load_dataset(normal_dataset, malware_dataset))
     signal.signal(signal.SIGINT, handler) # Init a sig init handler
 
     classifier.init_counter() # Init counters for each family

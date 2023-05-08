@@ -99,9 +99,9 @@ class SuricataParser:
             flow = json.loads(record)
             if flow['proto'] in ['UDP', 'TCP']:
                 self._extract_features(flow)
-        print("Normal flows") 
-        print("Updated: ", self.update)
-        print("Created: ", self.create)
+        #print("Normal flows") 
+        #print("Updated: ", self.update)
+        #print("Created: ", self.create)
 
     def print_flows(self):
         print("\t\t\tKey\t\t\t app_proto duration rx_b rx_p tx_b tx_p label")

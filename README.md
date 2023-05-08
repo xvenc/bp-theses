@@ -45,7 +45,7 @@ Then just turn off the suricata deamon, if it's running using command:
 $ sudo systemctl stop suricata.service
 ```
 
-Then in config file `suricata.yaml` on line 19 you need to change the range of IP adresses you want to capture on. Default is 192.168.1.0/24.
+Then in config file `suricata.yaml` on line 19 you need to change the range of IP adresses you want to capture on. Default is 192.168.0.0/16.
 
 And then launch suricata from terminal using command (with the name of the interface you want to caputre on):
 ```
@@ -190,6 +190,8 @@ example_family.txt  malware/  README.md  reports/  requirements.txt  src/  triag
 Sctipt to show accuracy, F1-score, false positive rate, precision and sensitivity for all 6 machine learning algorithms with normal arguments and for four machine learning algorithms with modified arguments.
 
 The success metrics are printed for each machine learning model individualy to the terminal window and accuracy and confusion matrix graphs are shown.
+
+The graphs are first shown for the improved algortihms and then for all normal algorithms.
 
 ```
 Usage: python3 machine_learning.py [COMMAND]
