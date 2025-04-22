@@ -16,7 +16,7 @@ from src.sample_uploader import Uploader
 
 # Global variables
 public_api = "https://api.tria.ge/"
-auth_api_key = "349a1f88ad1e2aee63e6e304a1400ca1af82e423"
+auth_api_key = ""
 report_dir = "reports/"
 log_dir = "logs/"
 pcap_dir = "pcaps/"
